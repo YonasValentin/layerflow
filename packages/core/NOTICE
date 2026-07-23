@@ -1,0 +1,6 @@
+Layerflow
+Copyright 2026 YonasValentin
+
+This product includes the use-sync-external-store package from the React project, under its applicable open-source license.
+
+React, React Native, Expo, @expo/ui, and Gorhom Bottom Sheet are trademarks or names of their respective owners. The optional adapter packages depend on them as peer dependencies but do not bundle them. This project is independent and is not endorsed by Meta, Expo, or the adapter library authors.

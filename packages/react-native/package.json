@@ -2,7 +2,7 @@
   "name": "@layerflow/react-native",
   "version": "0.1.0",
   "description": "React Native integrations and adapters for Layerflow.",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",
@@ -28,7 +28,8 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "NOTICE"
   ],
   "peerDependencies": {
     "@layerflow/core": "^0.1.0",

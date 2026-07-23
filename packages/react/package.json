@@ -2,7 +2,7 @@
   "name": "@layerflow/react",
   "version": "0.1.0",
   "description": "React bindings and typed presentation registry for Layerflow.",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.cjs",
@@ -23,7 +23,8 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "NOTICE"
   ],
   "engines": {
     "node": ">=20.11"

@@ -1,5 +1,11 @@
 # Layerflow
 
+[![CI](https://github.com/YonasValentin/layerflow/actions/workflows/ci.yml/badge.svg)](https://github.com/YonasValentin/layerflow/actions/workflows/ci.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](./LICENSE)
+[![Node.js >= 22.13](https://img.shields.io/badge/node-%3E%3D22.13-brightgreen.svg)](https://nodejs.org)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://prettier.io)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
+
 Layerflow schedules your app's overlays — sheets, dialogs, toasts, banners, popovers, route-backed
 screens — so you stop juggling refs, boolean flags, and `setTimeout` calls to keep them from
 stepping on each other. It works the same way in React, React Native, and Expo.
