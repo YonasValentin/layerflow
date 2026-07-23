@@ -29,7 +29,25 @@ for (const pkg of packages) {
   }
 
   process.stdout.write(`publish ${pkg.name}@${pkg.version}\n`);
-  execFileSync('npm', ['publish', '--workspace', pkg.name, '--access', 'public', '--provenance'], {
-    stdio: 'inherit',
-  });
+  try {
+    execFileSync(
+      'npm',
+      ['publish', '--workspace', pkg.name, '--access', 'public', '--provenance'],
+      {
+        stdio: 'pipe',
+        encoding: 'utf8',
+      },
+    );
+  } catch (error) {
+    // The `npm view` pre-check can miss a version that was just published elsewhere
+    // (registry read replicas lag the write). If publish then reports the version is
+    // already there, treat it as done rather than failing the release; rethrow anything else.
+    const output = `${error.stdout ?? ''}${error.stderr ?? ''}`;
+    if (/cannot publish over|previously published/i.test(output)) {
+      process.stdout.write(`skip    ${pkg.name}@${pkg.version} (already published; race)\n`);
+      continue;
+    }
+    process.stderr.write(output);
+    throw error;
+  }
 }
