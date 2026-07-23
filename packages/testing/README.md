@@ -1,4 +1,4 @@
-# @layerflow/testing
+# @yonas-valentin-dev/layerflow-testing
 
 Deterministic helpers for testing Layerflow without mounting real native surfaces.
 

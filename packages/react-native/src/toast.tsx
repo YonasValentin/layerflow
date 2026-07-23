@@ -10,7 +10,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import type { PresentationAdapterProps } from '@layerflow/react';
+import type { PresentationAdapterProps } from '@yonas-valentin-dev/layerflow-react';
 
 export interface BasicToastAdapterOptions {
   readonly durationMs?: number;

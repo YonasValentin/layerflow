@@ -17,7 +17,7 @@ public npm registry.
 - `npm run test` — 88 Vitest tests pass across all six packages (core scheduler, React host and
   hooks, the Expo UI, Gorhom, toast, banner, and back-handler adapters, and the testing helpers).
   Component tests run in jsdom with `@testing-library/react`; native primitives are mocked to
-  reproduce their documented callback contracts. Cross-package `@layerflow/*` imports resolve to
+  reproduce their documented callback contracts. Cross-package `@yonas-valentin-dev/layerflow-*` imports resolve to
   source (see `vitest.config.ts`), so the suite runs on a clean checkout without a prior build.
 - `npm run test:coverage` — 96.94% statements/lines, 95.5% functions, 89.43% branches across all
   package sources (core itself at 100% statements/lines); thresholds (90/90/90/85) met.
@@ -31,7 +31,7 @@ public npm registry.
 - Dual-module type resolution — a `.cts` consumer compiled with `module: node16` resolves every
   package without TS1479, because each `exports` entry nests `types` per condition
   (`import` → `index.d.ts`, `require` → `index.d.cts`).
-- Runtime smoke test of the built artifacts: `@layerflow/core` imported through both the ESM
+- Runtime smoke test of the built artifacts: `@yonas-valentin-dev/layerflow-core` imported through both the ESM
   (`dist/index.js`) and CJS (`dist/index.cjs`) export conditions, driving a request through
   `mounting → presented → dismissing → settled` and a user dismissal.
 - Official API usage verified against current documentation:
@@ -61,7 +61,7 @@ public npm registry.
   dismissal therefore settles immediately from the callback, while programmatic dismissal settles
   after a bounded, configurable `closeDurationMs` so the close animation can finish. This is the
   documented exception to the "never guess an animation duration" rule in
-  `docs/adapter-authoring.md`. The `@layerflow/gorhom` adapter has real `onChange` and `onDismiss`
+  `docs/adapter-authoring.md`. The `@yonas-valentin-dev/layerflow-gorhom` adapter has real `onChange` and `onDismiss`
   signals and uses them instead.
 - **Sheet presentation timing.** The Expo UI adapter reports `presented()` at mount because the
   primitive exposes no presentation-complete callback, so that phase leads the visible sheet by the
@@ -82,7 +82,7 @@ public npm registry.
 ## Manual, not machine-checkable
 
 - `npm run release:check` passes: every `packages/*/package.json` already points `repository.url` at
-  the real repository. Reserving the `@layerflow` npm scope, configuring a trusted publisher per
+  the real repository. Publishing under the owned `@yonas-valentin-dev/*` scope, configuring a trusted publisher per
   package, and the one-time provenance-off bootstrap publish remain human steps the script cannot
   verify — see `docs/releasing.md`.
 

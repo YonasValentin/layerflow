@@ -1,5 +1,5 @@
 {
-  "name": "@layerflow/react",
+  "name": "@yonas-valentin-dev/layerflow-react",
   "version": "0.1.0",
   "description": "React bindings and typed presentation registry for Layerflow.",
   "license": "Apache-2.0",
@@ -33,11 +33,11 @@
     "use-sync-external-store": "^1.6.0"
   },
   "peerDependencies": {
-    "@layerflow/core": "^0.1.0",
+    "@yonas-valentin-dev/layerflow-core": "^0.1.0",
     "react": ">=18.3.0"
   },
   "devDependencies": {
-    "@layerflow/core": "0.1.0"
+    "@yonas-valentin-dev/layerflow-core": "0.1.0"
   },
   "publishConfig": {
     "access": "public",
@@ -49,7 +49,7 @@
     "directory": "packages/react"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean --tsconfig tsconfig.build.json --external react --external @layerflow/core --external use-sync-external-store",
+    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean --tsconfig tsconfig.build.json --external react --external @yonas-valentin-dev/layerflow-core --external use-sync-external-store",
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
   }
 }

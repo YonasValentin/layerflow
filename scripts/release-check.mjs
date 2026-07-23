@@ -14,8 +14,8 @@ for (const file of packageFiles) {
     errors.push(`${file}: missing version`);
   }
 }
-// Reserving the @layerflow npm scope and configuring a trusted publisher per package
-// are one-time human steps documented in docs/releasing.md, not machine-checkable here.
+// Configuring a trusted publisher per package on npm is a one-time human step
+// documented in docs/releasing.md, not machine-checkable here.
 if (errors.length > 0) {
   console.error(errors.join('\n'));
   process.exitCode = 1;

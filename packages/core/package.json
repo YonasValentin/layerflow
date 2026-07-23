@@ -1,5 +1,5 @@
 {
-  "name": "@layerflow/core",
+  "name": "@yonas-valentin-dev/layerflow-core",
   "version": "0.1.0",
   "description": "Framework-independent presentation queue and lifecycle scheduler.",
   "license": "Apache-2.0",

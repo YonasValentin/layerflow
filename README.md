@@ -24,8 +24,10 @@ if (outcome.status === 'resolved' && outcome.value) {
 The caller has no idea whether `confirmDelete` shows up as an Expo UI sheet, a native alert, or a
 web dialog. That is the point: you swap the adapter without touching the call site.
 
-> The `@layerflow/*` packages aren't on npm yet. The scope is a placeholder until it's reserved, so
-> the install commands below won't work until the first release.
+> Packages publish under the `@yonas-valentin-dev/layerflow-*` scope — the shorter `@layerflow`
+> scope on npm belongs to an unrelated project. The native adapters (`react-native`, `expo-ui`,
+> `gorhom`) are `0.1.0` and covered only by mocked-primitive tests; they have not yet run on a
+> device, so treat them as experimental until the on-device pass lands.
 
 ## Why it exists
 
@@ -40,35 +42,35 @@ finished — so the next overlay never races the last one out the door.
 
 ## Packages
 
-| Package                   | Purpose                                                                           |
-| ------------------------- | --------------------------------------------------------------------------------- |
-| `@layerflow/core`         | Framework-independent scheduler, lanes, lifecycle, outcomes, cancellation, events |
-| `@layerflow/react`        | Typed registry, provider, hooks, host, and adapter contract                       |
-| `@layerflow/react-native` | Android back handling plus basic animated toast and banner adapters               |
-| `@layerflow/expo-ui`      | Adapter for the universal `@expo/ui` BottomSheet                                  |
-| `@layerflow/gorhom`       | Adapter for Gorhom Bottom Sheet Modal v5                                          |
-| `@layerflow/testing`      | Deterministic test helpers                                                        |
+| Package                                      | Purpose                                                                           |
+| -------------------------------------------- | --------------------------------------------------------------------------------- |
+| `@yonas-valentin-dev/layerflow-core`         | Framework-independent scheduler, lanes, lifecycle, outcomes, cancellation, events |
+| `@yonas-valentin-dev/layerflow-react`        | Typed registry, provider, hooks, host, and adapter contract                       |
+| `@yonas-valentin-dev/layerflow-react-native` | Android back handling plus basic animated toast and banner adapters               |
+| `@yonas-valentin-dev/layerflow-expo-ui`      | Adapter for the universal `@expo/ui` BottomSheet                                  |
+| `@yonas-valentin-dev/layerflow-gorhom`       | Adapter for Gorhom Bottom Sheet Modal v5                                          |
+| `@yonas-valentin-dev/layerflow-testing`      | Deterministic test helpers                                                        |
 
 ## Install
 
 ```bash
-npm install @layerflow/core @layerflow/react
+npm install @yonas-valentin-dev/layerflow-core @yonas-valentin-dev/layerflow-react
 ```
 
 For Expo UI sheets:
 
 ```bash
 npx expo install @expo/ui
-npm install @layerflow/expo-ui
+npm install @yonas-valentin-dev/layerflow-expo-ui
 ```
 
-`@layerflow/expo-ui` follows `@expo/ui`'s own floor, so adding it raises your app's minimum to
+`@yonas-valentin-dev/layerflow-expo-ui` follows `@expo/ui`'s own floor, so adding it raises your app's minimum to
 **React ≥ 19.2 and React Native ≥ 0.85**. The other adapters stay at React ≥ 18.3 / RN ≥ 0.76.
 
 For Gorhom sheets:
 
 ```bash
-npm install @layerflow/gorhom @gorhom/bottom-sheet
+npm install @yonas-valentin-dev/layerflow-gorhom @gorhom/bottom-sheet
 npx expo install react-native-gesture-handler react-native-reanimated react-native-worklets
 ```
 
@@ -79,7 +81,10 @@ mounted above your `PresentationHost`; without the provider the modal throws on 
 ## Define typed content
 
 ```tsx
-import { createPresentationRegistry, createPresentationSystem } from '@layerflow/react';
+import {
+  createPresentationRegistry,
+  createPresentationSystem,
+} from '@yonas-valentin-dev/layerflow-react';
 
 interface AppPresentations {
   confirmDelete: {
@@ -128,17 +133,17 @@ export const layerflow = createPresentationSystem(registry);
 ## Mount adapters once
 
 ```tsx
-import { PresentationHost, PresentationProvider } from '@layerflow/react';
+import { PresentationHost, PresentationProvider } from '@yonas-valentin-dev/layerflow-react';
 import {
   BasicBannerRenderer,
   BasicToastRenderer,
   type BasicBannerAdapterOptions,
   type BasicToastAdapterOptions,
-} from '@layerflow/react-native';
+} from '@yonas-valentin-dev/layerflow-react-native';
 import {
   ExpoUiBottomSheetRenderer,
   type ExpoUiBottomSheetAdapterOptions,
-} from '@layerflow/expo-ui';
+} from '@yonas-valentin-dev/layerflow-expo-ui';
 
 export function Root() {
   return (
@@ -159,7 +164,7 @@ export function Root() {
 ## Content controls its result
 
 ```tsx
-import type { PresentationContentProps } from '@layerflow/react';
+import type { PresentationContentProps } from '@yonas-valentin-dev/layerflow-react';
 
 type Props = PresentationContentProps<{ propertyId: string }, boolean>;
 
@@ -183,7 +188,7 @@ Adapters report that completion from the primitive's own callback whenever one e
 exception. `@expo/ui` fires `onDismiss` only for a user swipe or tap and reports nothing for a
 programmatic close, so that adapter settles after a bounded, configurable `closeDurationMs`. The
 [adapter authoring guide](docs/adapter-authoring.md) and the
-[`@layerflow/expo-ui` README](packages/expo-ui/README.md) explain why.
+[`@yonas-valentin-dev/layerflow-expo-ui` README](packages/expo-ui/README.md) explain why.
 
 ## Queue strategies
 

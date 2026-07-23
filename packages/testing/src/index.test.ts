@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { createPresentationManager } from '@layerflow/core';
+import { createPresentationManager } from '@yonas-valentin-dev/layerflow-core';
 import { completeActiveDismissal, getActiveRequest, presentActiveRequest } from './index.js';
 
 interface TestMap {
   alpha: { input: { value: number }; result: string };
 }
 
-describe('@layerflow/testing helpers', () => {
+describe('@yonas-valentin-dev/layerflow-testing helpers', () => {
   it('getActiveRequest returns the active request, or throws for an empty lane', () => {
     const manager = createPresentationManager<TestMap>();
     expect(() => getActiveRequest(manager)).toThrow(/active request/);

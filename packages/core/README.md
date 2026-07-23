@@ -1,10 +1,10 @@
-# @layerflow/core
+# @yonas-valentin-dev/layerflow-core
 
 The scheduler behind Layerflow, with no dependency on React or any platform. It coordinates sheets,
 dialogs, toasts, banners, popovers, and route-backed UI.
 
 ```ts
-import { createPresentationManager } from '@layerflow/core';
+import { createPresentationManager } from '@yonas-valentin-dev/layerflow-core';
 
 interface Presentations {
   confirmDelete: {

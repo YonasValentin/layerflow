@@ -1,4 +1,7 @@
-# @layerflow/expo-ui
+# @yonas-valentin-dev/layerflow-expo-ui
+
+> **Experimental (0.1.0).** Covered by mocked-primitive tests only; not yet run on a device. Verify
+> on iOS/Android/web before relying on it in production.
 
 Layerflow adapter for the controlled universal `BottomSheet` from `@expo/ui`.
 
@@ -37,4 +40,4 @@ adapterOptions: {
 
 This bounded delay is a deliberate exception to the "never guess an animation duration" rule in
 `docs/adapter-authoring.md`, which applies when a primitive exposes no completion callback at all.
-The `@layerflow/gorhom` adapter has a real completion signal and uses it instead.
+The `@yonas-valentin-dev/layerflow-gorhom` adapter has a real completion signal and uses it instead.

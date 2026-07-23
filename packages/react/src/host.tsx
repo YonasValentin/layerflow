@@ -1,5 +1,5 @@
 import { Fragment, Suspense, createElement, memo, useEffect, useMemo, useRef } from 'react';
-import type { PresentationRequestSnapshot } from '@layerflow/core';
+import type { PresentationRequestSnapshot } from '@yonas-valentin-dev/layerflow-core';
 import { usePresentationSnapshot } from './hooks.js';
 import { usePresentationSystem } from './context.js';
 import { PresentationErrorBoundary } from './error-boundary.js';

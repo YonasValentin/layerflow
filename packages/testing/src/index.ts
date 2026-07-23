@@ -1,4 +1,7 @@
-import type { PresentationManager, PresentationRequestSnapshot } from '@layerflow/core';
+import type {
+  PresentationManager,
+  PresentationRequestSnapshot,
+} from '@yonas-valentin-dev/layerflow-core';
 
 /** Returns the first active request in a lane or throws a useful assertion error. */
 export function getActiveRequest<Map extends object>(

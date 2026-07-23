@@ -1,11 +1,11 @@
 import { Button, Text, View } from 'react-native';
-import type { BasicToastAdapterOptions } from '@layerflow/react-native';
-import type { ExpoUiBottomSheetAdapterOptions } from '@layerflow/expo-ui';
+import type { BasicToastAdapterOptions } from '@yonas-valentin-dev/layerflow-react-native';
+import type { ExpoUiBottomSheetAdapterOptions } from '@yonas-valentin-dev/layerflow-expo-ui';
 import {
   createPresentationRegistry,
   createPresentationSystem,
   type PresentationContentProps,
-} from '@layerflow/react';
+} from '@yonas-valentin-dev/layerflow-react';
 
 interface Presentations {
   filters: {

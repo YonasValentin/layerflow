@@ -60,5 +60,5 @@
   pinned by commit SHA; CI gates on `npm audit --omit=dev`; CodeQL runs `security-extended`; the
   redundant `.npmrc` `provenance` flag that blocked the local bootstrap publish is removed; every
   package declares `engines.node >= 22.13`.
-- Tests resolve `@layerflow/*` to source, so `npm test` runs on a clean checkout; adds coverage for
+- Tests resolve `@yonas-valentin-dev/layerflow-*` to source, so `npm test` runs on a clean checkout; adds coverage for
   the testing helpers, FIFO ordering, the dismiss watchdog, and the host queued-leak fix.

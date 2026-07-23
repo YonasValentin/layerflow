@@ -8,7 +8,7 @@ import {
   PresentationProvider,
   createPresentationRegistry,
   createPresentationSystem,
-} from '@layerflow/react';
+} from '@yonas-valentin-dev/layerflow-react';
 
 // Mirrors gorhom v5: present() defers mounting to the next frame, dismiss() before
 // that frame is a no-op on a null ref, and onDismiss fires from unmount().

@@ -6,7 +6,7 @@ import {
   PresentationProvider,
   createPresentationRegistry,
   createPresentationSystem,
-} from '@layerflow/react';
+} from '@yonas-valentin-dev/layerflow-react';
 
 const backHandler = {
   addCalls: 0,

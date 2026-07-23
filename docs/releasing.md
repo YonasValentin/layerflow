@@ -1,6 +1,7 @@
 # Releasing
 
-1. Reserve the `@layerflow` npm scope (or rename every package to a scope you own).
+1. Packages publish under the `@yonas-valentin-dev/*` scope (the `@layerflow` scope on npm belongs
+   to an unrelated project). To use a different scope, rename every package and its cross-references.
 2. Confirm each `packages/*/package.json` points `repository.url` at the real repository
    (`npm run release:check` fails if any is missing or still a placeholder).
 3. Generate and commit the lockfile with the selected package manager.
@@ -28,7 +29,7 @@ opt out of it explicitly (the packages set `publishConfig.provenance`, which oth
 everywhere):
 
 ```bash
-npm publish --workspace @layerflow/core --access public --provenance=false
+npm publish --workspace @yonas-valentin-dev/layerflow-core --access public --provenance=false
 ```
 
 Once every package exists and trusted publishing is configured, the `publish.yml` workflow adds

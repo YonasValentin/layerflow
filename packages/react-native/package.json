@@ -1,5 +1,5 @@
 {
-  "name": "@layerflow/react-native",
+  "name": "@yonas-valentin-dev/layerflow-react-native",
   "version": "0.1.0",
   "description": "React Native integrations and adapters for Layerflow.",
   "license": "Apache-2.0",
@@ -32,14 +32,14 @@
     "NOTICE"
   ],
   "peerDependencies": {
-    "@layerflow/core": "^0.1.0",
-    "@layerflow/react": "^0.1.0",
+    "@yonas-valentin-dev/layerflow-core": "^0.1.0",
+    "@yonas-valentin-dev/layerflow-react": "^0.1.0",
     "react": ">=18.3.0",
     "react-native": ">=0.76.0"
   },
   "devDependencies": {
-    "@layerflow/core": "0.1.0",
-    "@layerflow/react": "0.1.0",
+    "@yonas-valentin-dev/layerflow-core": "0.1.0",
+    "@yonas-valentin-dev/layerflow-react": "0.1.0",
     "react-native": "0.86.0"
   },
   "publishConfig": {
@@ -52,7 +52,7 @@
     "directory": "packages/react-native"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean --tsconfig tsconfig.build.json --external react --external react-native --external @layerflow/core --external @layerflow/react",
+    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean --tsconfig tsconfig.build.json --external react --external react-native --external @yonas-valentin-dev/layerflow-core --external @yonas-valentin-dev/layerflow-react",
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
   },
   "engines": {

@@ -1,5 +1,5 @@
-import { createPresentationManager } from '@layerflow/core';
-import type { PresentationOptions } from '@layerflow/core';
+import { createPresentationManager } from '@yonas-valentin-dev/layerflow-core';
+import type { PresentationOptions } from '@yonas-valentin-dev/layerflow-core';
 import type {
   CreatePresentationSystemOptions,
   AnyPresentationDefinition,

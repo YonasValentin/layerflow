@@ -12,7 +12,7 @@ import type {
   PresentationRequestSnapshot,
   PresentationStrategy,
   ResultOf,
-} from '@layerflow/core';
+} from '@yonas-valentin-dev/layerflow-core';
 
 export interface PresentationContentProps<Input, Result> {
   readonly input: Input;

@@ -1,10 +1,13 @@
-# @layerflow/gorhom
+# @yonas-valentin-dev/layerflow-gorhom
+
+> **Experimental (0.1.0).** Covered by mocked-primitive tests only; not yet run on a device. Verify
+> on iOS/Android before relying on it in production.
 
 Layerflow adapter for Gorhom Bottom Sheet Modal v5.
 
 ```tsx
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { GorhomBottomSheetModalRenderer } from '@layerflow/gorhom';
+import { GorhomBottomSheetModalRenderer } from '@yonas-valentin-dev/layerflow-gorhom';
 
 <BottomSheetModalProvider>
   <PresentationProvider system={layerflow}>
