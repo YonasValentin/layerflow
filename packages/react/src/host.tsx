@@ -1,4 +1,4 @@
-import { Fragment, createElement, useEffect, useMemo, useRef } from 'react';
+import { Fragment, Suspense, createElement, memo, useEffect, useMemo, useRef } from 'react';
 import type { PresentationRequestSnapshot } from '@layerflow/core';
 import { usePresentationSnapshot } from './hooks.js';
 import { usePresentationSystem } from './context.js';
@@ -43,13 +43,18 @@ interface MissingPresentationProps {
 }
 
 function MissingPresentation({ error, controller, onMissing }: MissingPresentationProps) {
+  // `error`/`onMissing` are freshly allocated by the parent every render, so read them
+  // from a ref instead of the dep array — the effect then fires exactly once on mount
+  // rather than re-running (and risking a double-fire) on every parent re-render.
+  const latestRef = useRef({ error, onMissing });
+  latestRef.current = { error, onMissing };
   const firedRef = useRef(false);
   useEffect(() => {
     if (firedRef.current) return;
     firedRef.current = true;
-    onMissing?.();
-    controller.failed(error);
-  }, [controller, error, onMissing]);
+    latestRef.current.onMissing?.();
+    controller.failed(latestRef.current.error);
+  }, [controller]);
   return null;
 }
 
@@ -61,7 +66,7 @@ interface ItemProps {
   readonly onMissingAdapter?: PresentationHostProps['onMissingAdapter'];
 }
 
-function PresentationItem({ request, index, registry, adapters, onMissingAdapter }: ItemProps) {
+function PresentationItemImpl({ request, index, registry, adapters, onMissingAdapter }: ItemProps) {
   const { manager } = usePresentationSystem<object>();
   const definition = registry[request.key];
   const controller = useMemo(() => createController(manager, request.id), [manager, request.id]);
@@ -117,17 +122,45 @@ function PresentationItem({ request, index, registry, adapters, onMissingAdapter
     children: createElement(Content, contentProps),
   };
 
+  // Suspense isolates a presentation whose content suspends (React.lazy / use()): the
+  // error boundary alone cannot catch a thrown thenable, so without this a suspending
+  // presentation would unwind past the host and blank every sibling presentation.
   return (
-    <PresentationErrorBoundary onError={controller.failed}>
-      {createElement(Adapter, adapterProps)}
-    </PresentationErrorBoundary>
+    <Suspense fallback={null}>
+      <PresentationErrorBoundary onError={controller.failed}>
+        {createElement(Adapter, adapterProps)}
+      </PresentationErrorBoundary>
+    </Suspense>
   );
 }
 
+// Memoized so a mutation to one presentation does not re-render every other active item.
+// Unchanged requests keep a stable snapshot identity (core caches per revision+phase), so
+// the default shallow prop compare skips them.
+const PresentationItem = memo(PresentationItemImpl);
+
 /** Renders active presentations through surface-specific adapters. */
 export function PresentationHost({ adapters, onMissingAdapter }: PresentationHostProps) {
-  const { registry } = usePresentationSystem<object>();
+  const { registry, manager } = usePresentationSystem<object>();
   const snapshot = usePresentationSnapshot();
+
+  // Active presentations settle through each item's own unmount effect. Queued requests
+  // render no item, so on a genuine host teardown they would hang their callers forever;
+  // settle them here. Guarded like the per-item path so StrictMode's throwaway unmount
+  // (synchronously remounted) does not settle anything.
+  const liveRef = useRef(true);
+  useEffect(() => {
+    liveRef.current = true;
+    return () => {
+      liveRef.current = false;
+      queueMicrotask(() => {
+        if (liveRef.current) return;
+        for (const lane of Object.values(manager.getSnapshot().lanes)) {
+          for (const queued of lane.queue) manager.dismiss(queued.id, 'host-unmounted');
+        }
+      });
+    };
+  }, [manager]);
   const typedRegistry = registry as unknown as Readonly<Record<string, AnyPresentationDefinition>>;
   // `index` is per-surface: shipped adapters use it as their stacking slot, so a
   // surface's slots must run 0,1,2… independently of lanes.
