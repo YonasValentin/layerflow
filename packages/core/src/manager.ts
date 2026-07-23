@@ -39,6 +39,7 @@ interface RuntimeRequest {
   deferred: Deferred<PresentationOutcome<unknown>>;
   pendingOutcome: PresentationOutcome<unknown> | undefined;
   timeout: ReturnType<typeof setTimeout> | undefined;
+  dismissTimeout: ReturnType<typeof setTimeout> | undefined;
   removeAbortListener: (() => void) | undefined;
 }
 
@@ -100,6 +101,13 @@ export function createPresentationManager<Map extends object>(
 ): PresentationManager<Map> {
   const now = options.now ?? Date.now;
   const createId = options.createId ?? defaultId;
+  const dismissTimeoutMs = options.dismissTimeoutMs;
+  if (
+    dismissTimeoutMs !== undefined &&
+    (!Number.isFinite(dismissTimeoutMs) || dismissTimeoutMs < 0)
+  ) {
+    throw new RangeError('dismissTimeoutMs must be a finite, non-negative number.');
+  }
   const listeners = new Set<() => void>();
   const eventListeners = new Set<(event: PresentationEvent) => void>();
   const lanes = new Map<string, RuntimeLane>();
@@ -214,8 +222,10 @@ export function createPresentationManager<Map extends object>(
 
   const clearRuntimeResources = (request: RuntimeRequest): void => {
     if (request.timeout !== undefined) clearTimeout(request.timeout);
+    if (request.dismissTimeout !== undefined) clearTimeout(request.dismissTimeout);
     request.removeAbortListener?.();
     request.timeout = undefined;
+    request.dismissTimeout = undefined;
     request.removeAbortListener = undefined;
   };
 
@@ -284,6 +294,19 @@ export function createPresentationManager<Map extends object>(
       return;
     }
     request.phase = 'dismissing';
+    // The present-phase timeout only bounds how long a request stays open; once we are
+    // dismissing it is irrelevant, so retire it before arming the exit watchdog.
+    if (request.timeout !== undefined) {
+      clearTimeout(request.timeout);
+      request.timeout = undefined;
+    }
+    if (dismissTimeoutMs !== undefined) {
+      request.dismissTimeout = setTimeout(() => {
+        const current = requests.get(request.id);
+        if (current?.phase !== 'dismissing') return;
+        settle(current, current.pendingOutcome ?? outcome);
+      }, dismissTimeoutMs);
+    }
     if (rebuild) rebuildSnapshot();
   };
 
@@ -387,6 +410,7 @@ export function createPresentationManager<Map extends object>(
         deferred: createDeferred(),
         pendingOutcome: undefined,
         timeout: undefined,
+        dismissTimeout: undefined,
         removeAbortListener: undefined,
         ...(dedupeKey === undefined ? {} : { dedupeKey }),
         ...(requestOptions.scope === undefined ? {} : { scope: requestOptions.scope }),
@@ -513,8 +537,10 @@ export function createPresentationManager<Map extends object>(
     },
     dismissTop(laneNames, reason = 'hardware-back') {
       const selected = laneNames ?? ['blocking', 'anchored', 'navigation'];
+      // Read-only lookup: this is a query, so an unknown lane name must not create and
+      // permanently register a phantom lane (which would pollute every later snapshot).
       const candidates = selected
-        .flatMap((name) => getLane(name).active)
+        .flatMap((name) => lanes.get(name)?.active ?? [])
         .filter((request) => request.pendingOutcome === undefined);
       const top = candidates.sort((left, right) => right.sequence - left.sequence)[0];
       if (top === undefined) return false;

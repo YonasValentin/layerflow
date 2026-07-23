@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import {
+  AccessibilityInfo,
   Animated,
   Easing,
   Platform,
@@ -13,6 +14,11 @@ import type { PresentationAdapterProps } from '@layerflow/react';
 export interface BasicBannerAdapterOptions {
   readonly containerStyle?: StyleProp<ViewStyle>;
   readonly position?: 'top' | 'bottom';
+  /**
+   * Text announced to VoiceOver when the banner appears. Android reads the banner through
+   * its `accessibilityLiveRegion`; iOS has no equivalent prop, so set this to announce it.
+   */
+  readonly accessibilityLabel?: string;
 }
 
 function isBannerOptions(value: unknown): value is BasicBannerAdapterOptions {
@@ -32,6 +38,9 @@ export function BasicBannerRenderer({
   const dismissedBeforePresentationRef = useRef(false);
   const initialPhaseRef = useRef(request.phase);
   const position = options.position ?? 'top';
+  // Latest announcement text, read only from the async presentation callback.
+  const announceRef = useRef<string | undefined>(undefined);
+  announceRef.current = options.accessibilityLabel;
 
   useEffect(() => {
     if (initialPhaseRef.current === 'dismissing') {
@@ -47,7 +56,12 @@ export function BasicBannerRenderer({
       useNativeDriver: true,
     });
     animation.start(({ finished }) => {
-      if (finished) controller.presented();
+      if (!finished) return;
+      controller.presented();
+      // iOS has no live-region prop; announce explicitly for VoiceOver.
+      if (Platform.OS === 'ios' && announceRef.current !== undefined) {
+        AccessibilityInfo.announceForAccessibility(announceRef.current);
+      }
     });
     return () => animation.stop();
   }, [controller, opacity]);

@@ -6,10 +6,8 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   View,
   type StyleProp,
-  type TextStyle,
   type ViewStyle,
 } from 'react-native';
 import type { PresentationAdapterProps } from '@layerflow/react';
@@ -18,7 +16,11 @@ export interface BasicToastAdapterOptions {
   readonly durationMs?: number;
   readonly position?: 'top' | 'bottom';
   readonly containerStyle?: StyleProp<ViewStyle>;
-  readonly textStyle?: StyleProp<TextStyle>;
+  /**
+   * Text announced to VoiceOver/TalkBack when the toast appears. The toast renders the
+   * registered content verbatim and does not own its text, so set this when the content
+   * is not a plain string the screen reader can pick up on its own.
+   */
   readonly accessibilityLabel?: string;
 }
 
@@ -43,8 +45,7 @@ export function BasicToastRenderer({
   const position = options.position ?? 'bottom';
   // Latest announcement text, read only from the async presentation callback.
   const announceRef = useRef<string | undefined>(undefined);
-  announceRef.current =
-    options.accessibilityLabel ?? (typeof children === 'string' ? children : undefined);
+  announceRef.current = options.accessibilityLabel;
 
   const enter = useMemo(
     () =>
@@ -107,7 +108,11 @@ export function BasicToastRenderer({
         useNativeDriver: true,
       }),
     ]);
-    animation.start(() => controller.dismissed());
+    animation.start(({ finished }) => {
+      // Only settle when the exit animation actually completed; an interrupted stop()
+      // must not report a spurious dismissal (mirrors the enter-animation guard).
+      if (finished) controller.dismissed();
+    });
     return () => animation.stop();
   }, [controller, opacity, position, request.phase, translateY]);
 
@@ -129,11 +134,7 @@ export function BasicToastRenderer({
           onPress={() => controller.dismiss('user')}
           style={styles.pressable}
         >
-          {typeof children === 'string' ? (
-            <Text style={[styles.text, options.textStyle]}>{children}</Text>
-          ) : (
-            children
-          )}
+          {children}
         </Pressable>
       </Animated.View>
     </View>
@@ -162,10 +163,5 @@ const styles = StyleSheet.create({
   pressable: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-  },
-  text: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '600',
   },
 });

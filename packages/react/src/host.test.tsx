@@ -169,6 +169,30 @@ describe('PresentationHost', () => {
     expect(system.manager.getSnapshot().lanes['blocking']?.active).toHaveLength(0);
   });
 
+  it('settles queued requests too when the host unmounts', async () => {
+    const system = buildSystem();
+
+    // First request is active on the single-slot blocking lane; second waits in the queue.
+    const activePromise = system.present('confirm', { id: '1' });
+    const queuedPromise = system.present('confirm', { id: '2' });
+    const view = renderHost(system, { sheet: ImmediatePresentationAdapter });
+    await flush();
+
+    expect(system.manager.getSnapshot().lanes['blocking']?.queue).toHaveLength(1);
+
+    act(() => {
+      view.unmount();
+    });
+
+    await expect(activePromise).resolves.toMatchObject({ status: 'dismissed' });
+    await expect(queuedPromise).resolves.toMatchObject({
+      status: 'dismissed',
+      reason: 'host-unmounted',
+    });
+    expect(system.manager.getSnapshot().lanes['blocking']?.active).toHaveLength(0);
+    expect(system.manager.getSnapshot().lanes['blocking']?.queue).toHaveLength(0);
+  });
+
   it('does not settle a request when StrictMode remounts the host effects', async () => {
     const system = buildSystem();
     const KeepOpen = ({ controller }: PresentationAdapterProps) => {

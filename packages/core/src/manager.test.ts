@@ -624,4 +624,65 @@ describe('createPresentationManager scheduler regressions', () => {
     manager.notify(request.id, { type: 'dismissed' });
     await expect(request.result).resolves.toEqual({ status: 'resolved', value: 'first' });
   });
+
+  it('keeps FIFO lanes in insertion order regardless of priority', () => {
+    const manager = createPresentationManager<TestMap>();
+    manager.enqueue('alpha', { value: 1 }, { lane: 'navigation' }); // fills the single slot
+    manager.enqueue('alpha', { value: 2 }, { lane: 'navigation', priority: 1 });
+    manager.enqueue('alpha', { value: 3 }, { lane: 'navigation', priority: 10 });
+
+    // A priority lane would reorder the queue to [{value:3},{value:2}]; FIFO must not.
+    expect(
+      manager.getSnapshot().lanes['navigation']?.queue.map((request) => request.input),
+    ).toEqual([{ value: 2 }, { value: 3 }]);
+  });
+
+  it('dismissTop does not create a phantom lane for an unknown lane name', () => {
+    const manager = createPresentationManager<TestMap>();
+    const before = Object.keys(manager.getSnapshot().lanes);
+
+    expect(manager.dismissTop(['ghost'], 'hardware-back')).toBe(false);
+
+    expect(manager.getSnapshot().lanes['ghost']).toBeUndefined();
+    expect(Object.keys(manager.getSnapshot().lanes)).toEqual(before);
+  });
+
+  it('rejects a non-finite dismissTimeoutMs', () => {
+    expect(() => createPresentationManager<TestMap>({ dismissTimeoutMs: -1 })).toThrow(RangeError);
+  });
+
+  it('force-settles a request stuck in dismissing once dismissTimeoutMs elapses', async () => {
+    vi.useFakeTimers();
+    const manager = createPresentationManager<TestMap>({ dismissTimeoutMs: 200 });
+    const request = manager.enqueue('alpha', { value: 1 });
+    manager.notify(request.id, { type: 'mounted' });
+    manager.notify(request.id, { type: 'presented' });
+
+    // Adapter never reports dismissed(): the request would otherwise wedge the lane forever.
+    manager.dismiss(request.id, 'programmatic');
+    expect(manager.getSnapshot().lanes['blocking']?.active[0]?.phase).toBe('dismissing');
+
+    await vi.advanceTimersByTimeAsync(200);
+
+    await expect(request.result).resolves.toEqual({ status: 'dismissed', reason: 'programmatic' });
+    expect(activeIds(manager)).toEqual([]);
+    vi.useRealTimers();
+  });
+
+  it('waits indefinitely in dismissing when no dismissTimeoutMs is configured', async () => {
+    vi.useFakeTimers();
+    const manager = createPresentationManager<TestMap>();
+    const request = manager.enqueue('alpha', { value: 1 });
+    manager.notify(request.id, { type: 'mounted' });
+    manager.notify(request.id, { type: 'presented' });
+    manager.dismiss(request.id, 'programmatic');
+
+    await vi.advanceTimersByTimeAsync(10_000);
+
+    // Still dismissing — the caller waits for the adapter, as documented.
+    expect(manager.getSnapshot().lanes['blocking']?.active[0]?.phase).toBe('dismissing');
+    manager.notify(request.id, { type: 'dismissed' });
+    await expect(request.result).resolves.toEqual({ status: 'dismissed', reason: 'programmatic' });
+    vi.useRealTimers();
+  });
 });

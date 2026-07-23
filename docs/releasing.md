@@ -1,7 +1,8 @@
 # Releasing
 
 1. Reserve the `@layerflow` npm scope (or rename every package to a scope you own).
-2. Replace all `REPLACE_ME` repository placeholders in `packages/*/package.json`.
+2. Confirm each `packages/*/package.json` points `repository.url` at the real repository
+   (`npm run release:check` fails if any is missing or still a placeholder).
 3. Generate and commit the lockfile with the selected package manager.
 4. Run `npm run check` on both Node.js 22 and Node.js 24.
 5. Run `npm run release:check` and resolve every reported item.
@@ -21,6 +22,18 @@ package cannot use the tokenless flow.
 For that one release, publish with a short-lived granular access token (or `npm publish` locally
 with 2FA), then configure trusted publishing and revoke the token. Every later release runs through
 `publish.yml` with no token at all.
+
+Provenance can only be generated inside a supported CI runner, so a local bootstrap publish must
+opt out of it explicitly (the packages set `publishConfig.provenance`, which otherwise applies
+everywhere):
+
+```bash
+npm publish --workspace @layerflow/core --access public --provenance=false
+```
+
+Once every package exists and trusted publishing is configured, the `publish.yml` workflow adds
+provenance automatically via `scripts/publish-changed.mjs`, which publishes only the packages whose
+`name@version` is not already on the registry — so re-running a release is safe and idempotent.
 
 The publish workflow uses Node.js 24, npm 11, `id-token: write`, and npm trusted publishing. After
 bootstrapping, no long-lived npm publish token is expected.

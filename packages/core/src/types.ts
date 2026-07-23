@@ -69,6 +69,13 @@ export interface ManagerOptions {
   readonly now?: () => number;
   readonly createId?: () => string;
   readonly onEvent?: (event: PresentationEvent) => void;
+  /**
+   * Force-settles a request that has stayed in the `dismissing` phase for this many
+   * milliseconds, so a non-cooperative adapter that never reports `dismissed()` cannot
+   * deadlock the lane or leave the caller's promise pending forever. Opt-in; when unset,
+   * a request waits indefinitely for its adapter (the documented v0.1 behavior).
+   */
+  readonly dismissTimeoutMs?: number;
 }
 
 export interface PresentationRequestSnapshot {
