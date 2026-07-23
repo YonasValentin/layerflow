@@ -77,6 +77,24 @@ describe('useLayerflowBackHandler', () => {
     expect(backHandler.removeCalls).toBe(0);
   });
 
+  it('round-trips lane names including spaces to dismissTop', () => {
+    const system = build();
+    const spy = vi.spyOn(system.manager, 'dismissTop');
+    function Screen() {
+      useLayerflowBackHandler({ lanes: ['nav drawer', 'blocking'] });
+      return null;
+    }
+    render(
+      <PresentationProvider system={system}>
+        <Screen />
+      </PresentationProvider>,
+    );
+
+    backHandler.handler?.();
+
+    expect(spy).toHaveBeenCalledWith(['nav drawer', 'blocking'], 'hardware-back');
+  });
+
   it('consumes the back press only when a presentation was dismissed', () => {
     const system = build();
     function Screen() {
