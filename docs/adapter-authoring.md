@@ -26,7 +26,9 @@ export function CustomRenderer({ request, controller, children }: PresentationAd
 Every path must report exactly once. A request that never reports `dismissed()` stays in the
 `dismissing` phase forever: the caller's `present()` promise never settles and the lane's capacity is
 never released. Guard the report with a ref so a user gesture and a programmatic close cannot both
-settle the same request.
+settle the same request. As a backstop against a misbehaving adapter, create the manager with
+`dismissTimeoutMs` to force-settle a request that has stayed in `dismissing` too long — but a correct
+adapter should never need it.
 
 Do not use a guessed timeout to signal animation completion. A duration timer is appropriate for how
 long a toast remains visible, but not for deciding when a native surface has finished closing.
@@ -55,6 +57,31 @@ If the primitive has no presentation-complete callback, calling `presented()` at
 as a best effort. Note it in the adapter README, since consumers watching the `presented` phase will
 see it lead the visible UI by the animation duration.
 
+## Reading options and the stacking index
+
+Two `PresentationAdapterProps` fields drive most adapters:
+
+- `definition.adapterOptions` — the per-definition options object. It is typed as `unknown` at the
+  adapter boundary, so narrow it before use.
+- `index` — this adapter's **per-surface** slot (`0, 1, 2 …`), assigned independently of lanes. Use
+  it to offset stacked surfaces (toasts, banners) so they don't render on top of each other.
+
+```tsx
+export interface CustomAdapterOptions {
+  readonly gap?: number;
+}
+
+function isOptions(value: unknown): value is CustomAdapterOptions {
+  return typeof value === 'object' && value !== null;
+}
+
+export function CustomRenderer({ definition, index, children }: PresentationAdapterProps) {
+  const options = isOptions(definition.adapterOptions) ? definition.adapterOptions : {};
+  const offset = index * (options.gap ?? 64);
+  return <View style={{ transform: [{ translateY: offset }] }}>{children}</View>;
+}
+```
+
 ## Typed options
 
 Create an application surface map and pass it to `createPresentationRegistry`:
@@ -66,4 +93,5 @@ interface Surfaces {
 }
 ```
 
-This validates adapter options at the registry rather than inside individual screens.
+This validates adapter options at the registry rather than inside individual screens, so an adapter
+can trust the shape it narrows above.

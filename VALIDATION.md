@@ -14,18 +14,20 @@ public npm registry.
 - `npm run typecheck` — strict TypeScript 5.9 (`exactOptionalPropertyTypes`,
   `noUncheckedIndexedAccess`, `verbatimModuleSyntax`) across all package sources, tests, and the
   Expo example, using real dependency types.
-- `npm run test` — 78 Vitest tests pass across all six packages (core scheduler, React host and
-  hooks, and the Expo UI, Gorhom, toast, banner, and back-handler adapters). Component tests run in
-  jsdom with `@testing-library/react`; native primitives are mocked to reproduce their documented
-  callback contracts.
-- `npm run test:coverage` — 96.92% statements/lines, 94.38% functions, 88.32% branches across all
+- `npm run test` — 88 Vitest tests pass across all six packages (core scheduler, React host and
+  hooks, the Expo UI, Gorhom, toast, banner, and back-handler adapters, and the testing helpers).
+  Component tests run in jsdom with `@testing-library/react`; native primitives are mocked to
+  reproduce their documented callback contracts. Cross-package `@layerflow/*` imports resolve to
+  source (see `vitest.config.ts`), so the suite runs on a clean checkout without a prior build.
+- `npm run test:coverage` — 96.94% statements/lines, 95.5% functions, 89.43% branches across all
   package sources (core itself at 100% statements/lines); thresholds (90/90/90/85) met.
 - `npm run build` — tsup ESM + CJS + d.ts builds for all six packages. Each package uses a
   dedicated non-composite `tsconfig.build.json`, because tsup's d.ts program cannot consume the
   composite project references used by `tsc -b` (TS6307). Test files are excluded from every build
   and typecheck project, so they never reach `dist/`.
 - `npm run pack:dry-run` — `npm pack --dry-run --json` succeeds for all six workspaces; each
-  tarball contains exactly `dist/`, `README.md`, `LICENSE`, and `package.json`.
+  tarball contains `dist/` (JS, CJS, and `.d.ts`/`.d.cts` types with source maps), `README.md`,
+  `LICENSE`, `NOTICE`, and `package.json`.
 - Dual-module type resolution — a `.cts` consumer compiled with `module: node16` resolves every
   package without TS1479, because each `exports` entry nests `types` per condition
   (`import` → `index.d.ts`, `require` → `index.d.cts`).
@@ -64,6 +66,12 @@ public npm registry.
 - **Sheet presentation timing.** The Expo UI adapter reports `presented()` at mount because the
   primitive exposes no presentation-complete callback, so that phase leads the visible sheet by the
   enter-animation duration. The Gorhom adapter reports `presented()` from `onChange`.
+- **React `<Activity>` / Offscreen.** `PresentationHost` settles a presentation's caller when the
+  host (or an active item) unmounts, so a caller is never left hanging. React 19.2's `<Activity>`
+  destroys and re-creates effects when it hides a subtree, which an effect cannot distinguish from a
+  real unmount — so wrapping the host in a hidden `<Activity>` settles the presentations it holds.
+  Own the presentation system above any `<Activity>` boundary, or dispose it explicitly, rather than
+  relying on Activity to preserve in-flight presentations.
 
 ## Not verified here
 
@@ -71,12 +79,12 @@ public npm registry.
   against mocked primitives that reproduce the documented callback contracts; running
   `examples/expo-app` on real platforms remains the final gate before release.
 
-## Intentionally failing
+## Manual, not machine-checkable
 
-- `npm run release:check` fails until the `REPLACE_ME` repository URLs in `packages/*/package.json`
-  are replaced with the real repository, as described in `docs/releasing.md`. Reserving the
-  `@layerflow` npm scope and configuring a trusted publisher per package are one-time human steps
-  that the script cannot check.
+- `npm run release:check` passes: every `packages/*/package.json` already points `repository.url` at
+  the real repository. Reserving the `@layerflow` npm scope, configuring a trusted publisher per
+  package, and the one-time provenance-off bootstrap publish remain human steps the script cannot
+  verify — see `docs/releasing.md`.
 
 ## Before publication
 

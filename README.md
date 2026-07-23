@@ -62,12 +62,19 @@ npx expo install @expo/ui
 npm install @layerflow/expo-ui
 ```
 
+`@layerflow/expo-ui` follows `@expo/ui`'s own floor, so adding it raises your app's minimum to
+**React ≥ 19.2 and React Native ≥ 0.85**. The other adapters stay at React ≥ 18.3 / RN ≥ 0.76.
+
 For Gorhom sheets:
 
 ```bash
 npm install @layerflow/gorhom @gorhom/bottom-sheet
 npx expo install react-native-gesture-handler react-native-reanimated react-native-worklets
 ```
+
+Gorhom's modal API needs a `<BottomSheetModalProvider>` (and gesture-handler's `GestureHandlerRootView`)
+mounted above your `PresentationHost`; without the provider the modal throws on render. See the
+[`@gorhom/bottom-sheet` docs](https://gorhom.dev/react-native-bottom-sheet/modal/usage).
 
 ## Define typed content
 
@@ -105,6 +112,9 @@ const registry = createPresentationRegistry<AppPresentations, AppSurfaces>()({
     surface: 'toast',
     lane: 'transient',
     strategy: 'coalesce',
+    // Coalesce per message, so two different toasts don't collapse into one. Without a
+    // dedupeKey, `coalesce` falls back to the presentation key and every `saved` merges.
+    dedupeKey: (input) => input.message,
     component: SavedToastContent,
     adapterOptions: {
       durationMs: 3000,
