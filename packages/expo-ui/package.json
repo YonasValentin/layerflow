@@ -1,0 +1,59 @@
+{
+  "name": "@layerflow/expo-ui",
+  "version": "0.1.0",
+  "description": "Expo UI presentation adapters for Layerflow.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "react-native": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "react-native": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "@expo/ui": ">=57.0.0 <58.0.0",
+    "@layerflow/core": "^0.1.0",
+    "@layerflow/react": "^0.1.0",
+    "react": ">=19.2.0",
+    "react-native": ">=0.85.0"
+  },
+  "devDependencies": {
+    "@expo/ui": "57.0.7",
+    "@layerflow/core": "0.1.0",
+    "@layerflow/react": "0.1.0",
+    "react-native": "0.86.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YonasValentin/layerflow.git",
+    "directory": "packages/expo-ui"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean --tsconfig tsconfig.build.json --external react --external react-native --external @expo/ui --external @layerflow/core --external @layerflow/react",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
+  }
+}

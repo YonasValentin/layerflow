@@ -1,0 +1,23 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/core"
+    },
+    {
+      "path": "./packages/react"
+    },
+    {
+      "path": "./packages/react-native"
+    },
+    {
+      "path": "./packages/expo-ui"
+    },
+    {
+      "path": "./packages/gorhom"
+    },
+    {
+      "path": "./packages/testing"
+    }
+  ]
+}

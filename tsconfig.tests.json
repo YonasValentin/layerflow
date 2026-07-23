@@ -1,0 +1,26 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@layerflow/core": ["packages/core/src/index.ts"],
+      "@layerflow/react": ["packages/react/src/index.ts"],
+      "@layerflow/react-native": ["packages/react-native/src/index.ts"],
+      "@layerflow/expo-ui": ["packages/expo-ui/src/index.ts"],
+      "@layerflow/testing": ["packages/testing/src/index.ts"],
+      "@layerflow/gorhom": ["packages/gorhom/src/index.ts"]
+    },
+    "types": ["node", "react"]
+  },
+  "include": [
+    "packages/**/*.test.ts",
+    "packages/**/*.test.tsx",
+    "examples/**/*.ts",
+    "examples/**/*.tsx",
+    "scripts/vitest-setup.ts",
+    "vitest.config.ts"
+  ]
+}
