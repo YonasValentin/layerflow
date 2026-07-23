@@ -1,4 +1,7 @@
-# @layerflow/react-native
+# @yonas-valentin-dev/layerflow-react-native
+
+> **Experimental (0.1.0).** Covered by mocked-primitive tests only; not yet run on a device. Verify
+> on iOS/Android before relying on it in production.
 
 React Native integrations for Layerflow:
 

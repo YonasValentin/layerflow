@@ -4,7 +4,7 @@ An adapter is a React component receiving the active request, its definition, a 
 and the registered content.
 
 ```tsx
-import type { PresentationAdapterProps } from '@layerflow/react';
+import type { PresentationAdapterProps } from '@yonas-valentin-dev/layerflow-react';
 
 export function CustomRenderer({ request, controller, children }: PresentationAdapterProps) {
   // Report mount/presentation after the underlying surface is ready.
@@ -48,7 +48,7 @@ bounded, caller-configurable delay:
 - Keep the real callback for the paths that do report, so user dismissal still settles immediately.
 - Document the limitation in the adapter's README.
 
-Prefer a real signal whenever one exists. `@layerflow/gorhom` reports `presented()` from `onChange`
+Prefer a real signal whenever one exists. `@yonas-valentin-dev/layerflow-gorhom` reports `presented()` from `onChange`
 and settles from `onDismiss` precisely because Gorhom provides both.
 
 ### Reporting `presented()`

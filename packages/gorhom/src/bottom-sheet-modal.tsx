@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { BottomSheetModal, type BottomSheetModalProps } from '@gorhom/bottom-sheet';
-import type { PresentationAdapterProps } from '@layerflow/react';
+import type { PresentationAdapterProps } from '@yonas-valentin-dev/layerflow-react';
 
 type LayerflowControlledProps =
   'children' | 'enableDismissOnClose' | 'name' | 'onChange' | 'onDismiss' | 'stackBehavior';

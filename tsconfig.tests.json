@@ -6,12 +6,12 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@layerflow/core": ["packages/core/src/index.ts"],
-      "@layerflow/react": ["packages/react/src/index.ts"],
-      "@layerflow/react-native": ["packages/react-native/src/index.ts"],
-      "@layerflow/expo-ui": ["packages/expo-ui/src/index.ts"],
-      "@layerflow/testing": ["packages/testing/src/index.ts"],
-      "@layerflow/gorhom": ["packages/gorhom/src/index.ts"]
+      "@yonas-valentin-dev/layerflow-core": ["packages/core/src/index.ts"],
+      "@yonas-valentin-dev/layerflow-react": ["packages/react/src/index.ts"],
+      "@yonas-valentin-dev/layerflow-react-native": ["packages/react-native/src/index.ts"],
+      "@yonas-valentin-dev/layerflow-expo-ui": ["packages/expo-ui/src/index.ts"],
+      "@yonas-valentin-dev/layerflow-testing": ["packages/testing/src/index.ts"],
+      "@yonas-valentin-dev/layerflow-gorhom": ["packages/gorhom/src/index.ts"]
     },
     "types": ["node", "react"]
   },

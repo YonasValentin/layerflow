@@ -5,17 +5,17 @@ const src = (name: string): string =>
   fileURLToPath(new URL(`./packages/${name}/src/index.ts`, import.meta.url));
 
 export default defineConfig({
-  // Resolve cross-package `@layerflow/*` imports to source, not built `dist/`. Without this
+  // Resolve cross-package `@yonas-valentin-dev/layerflow-*` imports to source, not built `dist/`. Without this
   // `npm test` fails on a clean checkout (CI runs tests before build) and coverage would
   // measure stale artifacts instead of the code under test.
   resolve: {
     alias: {
-      '@layerflow/core': src('core'),
-      '@layerflow/react': src('react'),
-      '@layerflow/react-native': src('react-native'),
-      '@layerflow/expo-ui': src('expo-ui'),
-      '@layerflow/gorhom': src('gorhom'),
-      '@layerflow/testing': src('testing'),
+      '@yonas-valentin-dev/layerflow-core': src('core'),
+      '@yonas-valentin-dev/layerflow-react': src('react'),
+      '@yonas-valentin-dev/layerflow-react-native': src('react-native'),
+      '@yonas-valentin-dev/layerflow-expo-ui': src('expo-ui'),
+      '@yonas-valentin-dev/layerflow-gorhom': src('gorhom'),
+      '@yonas-valentin-dev/layerflow-testing': src('testing'),
     },
   },
   test: {

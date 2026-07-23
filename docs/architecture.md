@@ -4,7 +4,7 @@ Layerflow separates intent, scheduling, and rendering.
 
 ## Core
 
-`@layerflow/core` owns everything about scheduling: immutable snapshots, request outcomes, queue
+`@yonas-valentin-dev/layerflow-core` owns everything about scheduling: immutable snapshots, request outcomes, queue
 policy, lane capacity and priority, deduplication, content revisions, cancellation, and the
 lifecycle state machine. Request payloads stay caller-owned and are not deep-frozen. Core imports no
 React or platform code.
@@ -25,7 +25,7 @@ persistent offline banner. Each lane has a maximum active count and FIFO or prio
 
 ## React
 
-`@layerflow/react` subscribes with `useSyncExternalStore`. The manager snapshot is cached and
+`@yonas-valentin-dev/layerflow-react` subscribes with `useSyncExternalStore`. The manager snapshot is cached and
 immutable between mutations. The selector hook keeps referentially equal selections stable.
 
 The registry maps a semantic key to content, surface, policy, and adapter options. Application logic

@@ -1,5 +1,5 @@
 {
-  "name": "@layerflow/testing",
+  "name": "@yonas-valentin-dev/layerflow-testing",
   "version": "0.1.0",
   "description": "Deterministic test helpers for Layerflow.",
   "license": "Apache-2.0",
@@ -27,10 +27,10 @@
     "NOTICE"
   ],
   "peerDependencies": {
-    "@layerflow/core": "^0.1.0"
+    "@yonas-valentin-dev/layerflow-core": "^0.1.0"
   },
   "devDependencies": {
-    "@layerflow/core": "0.1.0"
+    "@yonas-valentin-dev/layerflow-core": "0.1.0"
   },
   "publishConfig": {
     "access": "public",
@@ -42,7 +42,7 @@
     "directory": "packages/testing"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean --tsconfig tsconfig.build.json --external @layerflow/core",
+    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean --tsconfig tsconfig.build.json --external @yonas-valentin-dev/layerflow-core",
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
   },
   "engines": {

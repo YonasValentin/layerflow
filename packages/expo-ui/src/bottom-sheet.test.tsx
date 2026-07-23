@@ -8,8 +8,8 @@ import {
   PresentationProvider,
   createPresentationRegistry,
   createPresentationSystem,
-} from '@layerflow/react';
-import type { PresentationContentProps } from '@layerflow/react';
+} from '@yonas-valentin-dev/layerflow-react';
+import type { PresentationContentProps } from '@yonas-valentin-dev/layerflow-react';
 
 // The universal BottomSheet only calls onDismiss for USER dismissal; a prop-driven
 // close (isPresented -> false) reports nothing. The mock reproduces that contract.

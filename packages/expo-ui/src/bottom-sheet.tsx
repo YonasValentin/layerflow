@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 import { BottomSheet, type BottomSheetProps } from '@expo/ui';
-import type { PresentationAdapterProps } from '@layerflow/react';
+import type { PresentationAdapterProps } from '@yonas-valentin-dev/layerflow-react';
 
 export interface ExpoUiBottomSheetAdapterOptions extends Pick<
   BottomSheetProps,

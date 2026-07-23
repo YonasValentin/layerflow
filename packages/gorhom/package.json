@@ -1,5 +1,5 @@
 {
-  "name": "@layerflow/gorhom",
+  "name": "@yonas-valentin-dev/layerflow-gorhom",
   "version": "0.1.0",
   "description": "Gorhom Bottom Sheet Modal adapter for Layerflow.",
   "license": "Apache-2.0",
@@ -33,8 +33,8 @@
   ],
   "peerDependencies": {
     "@gorhom/bottom-sheet": ">=5.2.14 <6.0.0",
-    "@layerflow/core": "^0.1.0",
-    "@layerflow/react": "^0.1.0",
+    "@yonas-valentin-dev/layerflow-core": "^0.1.0",
+    "@yonas-valentin-dev/layerflow-react": "^0.1.0",
     "react": ">=18.3.0",
     "react-native": ">=0.76.0",
     "react-native-gesture-handler": ">=2.16.1",
@@ -42,8 +42,8 @@
   },
   "devDependencies": {
     "@gorhom/bottom-sheet": "5.2.14",
-    "@layerflow/core": "0.1.0",
-    "@layerflow/react": "0.1.0",
+    "@yonas-valentin-dev/layerflow-core": "0.1.0",
+    "@yonas-valentin-dev/layerflow-react": "0.1.0",
     "react-native": "0.86.0",
     "react-native-gesture-handler": "2.32.0",
     "react-native-reanimated": "4.5.0"
@@ -58,7 +58,7 @@
     "directory": "packages/gorhom"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean --tsconfig tsconfig.build.json --external react --external react-native --external @gorhom/bottom-sheet --external react-native-gesture-handler --external react-native-reanimated --external @layerflow/core --external @layerflow/react",
+    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean --tsconfig tsconfig.build.json --external react --external react-native --external @gorhom/bottom-sheet --external react-native-gesture-handler --external react-native-reanimated --external @yonas-valentin-dev/layerflow-core --external @yonas-valentin-dev/layerflow-react",
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
   },
   "engines": {

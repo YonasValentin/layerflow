@@ -1,4 +1,4 @@
-# @layerflow/react
+# @yonas-valentin-dev/layerflow-react
 
 React bindings, a typed content registry, hooks, and a renderer host for Layerflow.
 

@@ -12,7 +12,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w @layerflow/core && npm run build -w @layerflow/react && npm run build -w @layerflow/react-native && npm run build -w @layerflow/expo-ui && npm run build -w @layerflow/gorhom && npm run build -w @layerflow/testing",
+    "build": "npm run build -w @yonas-valentin-dev/layerflow-core && npm run build -w @yonas-valentin-dev/layerflow-react && npm run build -w @yonas-valentin-dev/layerflow-react-native && npm run build -w @yonas-valentin-dev/layerflow-expo-ui && npm run build -w @yonas-valentin-dev/layerflow-gorhom && npm run build -w @yonas-valentin-dev/layerflow-testing",
     "clean": "npm run clean --workspaces --if-present && node -e \"require('node:fs').rmSync('.cache',{recursive:true,force:true})\"",
     "typecheck": "tsc -b --pretty false && tsc -p tsconfig.tests.json --pretty false",
     "lint": "eslint . --max-warnings=0",

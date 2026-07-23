@@ -1,6 +1,6 @@
 import { useEffect, useSyncExternalStore } from 'react';
 import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/shim/with-selector';
-import type { PresentationSnapshot } from '@layerflow/core';
+import type { PresentationSnapshot } from '@yonas-valentin-dev/layerflow-core';
 import { usePresentationSystem } from './context.js';
 import type { PresentationSystem } from './types.js';
 
