@@ -45,8 +45,8 @@
     "@yonas-valentin-dev/layerflow-core": "0.1.0",
     "@yonas-valentin-dev/layerflow-react": "0.1.0",
     "react-native": "0.86.0",
-    "react-native-gesture-handler": "2.32.0",
-    "react-native-reanimated": "4.5.0"
+    "react-native-gesture-handler": "3.1.0",
+    "react-native-reanimated": "4.5.3"
   },
   "publishConfig": {
     "access": "public",
