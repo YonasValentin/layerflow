@@ -35,17 +35,20 @@ long a toast remains visible, but not for deciding when a native surface has fin
 
 ### Exception: primitives with no completion callback
 
-Some primitives report nothing at all for a programmatic close. `@expo/ui`'s universal `BottomSheet`
-is the shipped example: its `onDismiss` fires only for user-initiated dismissal, and setting
-`isPresented` to `false` emits no event on any platform. Reporting `dismissed()` immediately would
-tear the surface down mid-animation; never reporting it deadlocks the lane.
+Some primitives report nothing usable for close completion. `@expo/ui`'s universal `BottomSheet` is
+the shipped example: setting `isPresented` to `false` emits no event on any platform, and its
+`onDismiss` fires when a _user_ close starts rather than when any close finishes. Reporting
+`dismissed()` immediately would tear the surface down mid-animation; never reporting it deadlocks
+the lane.
 
 Only when a primitive exposes no completion signal at all, close it and report `dismissed()` after a
 bounded, caller-configurable delay:
 
 - Expose the duration as an adapter option (`closeDurationMs`) so apps can tune it.
 - Default to the primitive's documented close duration, not an arbitrary guess.
-- Keep the real callback for the paths that do report, so user dismissal still settles immediately.
+- Treat a callback that marks the _start_ of a close as a dismissal request, not a completion:
+  route it through `controller.dismiss(reason)` so the request enters `dismissing` and settles from
+  the same bounded timer. Check what the callback actually means before trusting its name.
 - Document the limitation in the adapter's README.
 
 Prefer a real signal whenever one exists. `@yonas-valentin-dev/layerflow-gorhom` reports `presented()` from `onChange`

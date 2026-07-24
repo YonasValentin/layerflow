@@ -10,6 +10,12 @@ import {
 
 const announcements: string[] = [];
 let platform = 'ios';
+// Animations complete synchronously by default. Flip `autoFinish` off to hold them pending so
+// an interrupted `stop()` can be observed — real RN reports `{ finished: false }` there, and
+// the adapters must not treat that as a completed exit.
+let autoFinish = true;
+const pendingAnimations: ((result: { finished: boolean }) => void)[] = [];
+let fontScale = 1;
 
 // Minimal react-native surface: animations complete synchronously so the adapter's
 // lifecycle reporting can be asserted without a native driver.
@@ -26,8 +32,19 @@ vi.mock('react-native', () => {
     }
     return mapped;
   };
-  const finish = (cb?: (result: { finished: boolean }) => void) => cb?.({ finished: true });
+  const driver = () => ({
+    start: (cb?: (result: { finished: boolean }) => void) => {
+      if (cb === undefined) return;
+      if (autoFinish) cb({ finished: true });
+      else pendingAnimations.push(cb);
+    },
+    stop: () => {
+      if (autoFinish) return;
+      pendingAnimations.pop()?.({ finished: false });
+    },
+  });
   return {
+    PixelRatio: { getFontScale: () => fontScale },
     Platform: {
       get OS() {
         return platform;
@@ -40,8 +57,8 @@ vi.mock('react-native', () => {
       View: (props: Record<string, unknown> & { children?: unknown }) => (
         <div {...domProps(props)}>{props.children as never}</div>
       ),
-      timing: () => ({ start: finish, stop: () => undefined }),
-      parallel: () => ({ start: finish, stop: () => undefined }),
+      timing: driver,
+      parallel: driver,
     },
     Easing: { out: () => undefined, in: () => undefined, cubic: undefined },
     Pressable: (props: Record<string, unknown> & { children?: unknown }) => (
@@ -94,6 +111,9 @@ describe('BasicToastRenderer', () => {
   beforeEach(() => {
     announcements.length = 0;
     platform = 'ios';
+    autoFinish = true;
+    pendingAnimations.length = 0;
+    fontScale = 1;
   });
 
   it('reports presented after the enter animation and dismisses on the duration timer', async () => {
@@ -172,6 +192,45 @@ describe('BasicToastRenderer', () => {
 describe('BasicBannerRenderer', () => {
   beforeEach(() => {
     platform = 'android';
+    autoFinish = true;
+    pendingAnimations.length = 0;
+    fontScale = 1;
+  });
+
+  it('does not settle when the exit animation is interrupted', async () => {
+    autoFinish = false;
+    const system = build({}, 'banner');
+    const handle = system.enqueue('toast', { message: 'Offline' });
+    const view = mount(system, 'banner');
+
+    // Complete the enter animation so the banner reaches `presented`.
+    act(() => {
+      pendingAnimations.pop()?.({ finished: true });
+    });
+    expect(system.manager.getSnapshot().lanes['transient']?.active[0]?.phase).toBe('presented');
+
+    act(() => {
+      system.manager.dismiss(handle.id, 'programmatic');
+    });
+
+    // React Native invokes the end callback with `finished: false` when an animation is
+    // stopped or superseded. That is not a completed exit, so the request must stay in
+    // `dismissing` — reporting it would free the lane while the banner is still on screen.
+    act(() => {
+      pendingAnimations.pop()?.({ finished: false });
+    });
+    expect(system.manager.getSnapshot().lanes['transient']?.active[0]?.phase).toBe('dismissing');
+
+    // Tearing the host down is what actually ends it, and the outcome committed by the
+    // original dismiss still wins.
+    await act(async () => {
+      view.unmount();
+      await Promise.resolve();
+    });
+    await expect(handle.result).resolves.toEqual({
+      status: 'dismissed',
+      reason: 'programmatic',
+    });
   });
 
   it('drives the lifecycle and settles after the exit animation', async () => {

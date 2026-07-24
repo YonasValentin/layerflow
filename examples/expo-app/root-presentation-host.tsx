@@ -5,7 +5,7 @@ import {
   useLayerflowBackHandler,
 } from '@yonas-valentin-dev/layerflow-react-native';
 import { ExpoUiBottomSheetRenderer } from '@yonas-valentin-dev/layerflow-expo-ui';
-import { layerflow } from './layerflow.js';
+import { layerflow } from './layerflow';
 
 function BackHandlerBridge() {
   useLayerflowBackHandler();

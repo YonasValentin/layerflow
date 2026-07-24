@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    // Expo apps resolve through Metro, not Node. Type-checking the example under
+    // `Bundler` is what catches specifiers Metro cannot resolve — notably NodeNext's
+    // `./file.js` rewriting, which `tsc` accepts and Metro does not.
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "baseUrl": "../..",
+    "paths": {
+      "@yonas-valentin-dev/layerflow-core": ["packages/core/src/index.ts"],
+      "@yonas-valentin-dev/layerflow-react": ["packages/react/src/index.ts"],
+      "@yonas-valentin-dev/layerflow-react-native": ["packages/react-native/src/index.ts"],
+      "@yonas-valentin-dev/layerflow-expo-ui": ["packages/expo-ui/src/index.ts"],
+      "@yonas-valentin-dev/layerflow-gorhom": ["packages/gorhom/src/index.ts"],
+      "@yonas-valentin-dev/layerflow-testing": ["packages/testing/src/index.ts"]
+    },
+    "types": ["react"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
+}

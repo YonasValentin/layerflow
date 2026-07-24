@@ -1,6 +1,7 @@
 export { PresentationProvider, usePresentationSystem } from './context.js';
 export type { PresentationProviderProps } from './context.js';
 export { PresentationHost } from './host.js';
+export type { PresentationHostProps } from './host.js';
 export { ImmediatePresentationAdapter } from './immediate-adapter.js';
 export {
   usePresentationScope,

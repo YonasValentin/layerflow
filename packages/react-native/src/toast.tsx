@@ -3,6 +3,7 @@ import {
   AccessibilityInfo,
   Animated,
   Easing,
+  PixelRatio,
   Platform,
   Pressable,
   StyleSheet,
@@ -22,6 +23,18 @@ export interface BasicToastAdapterOptions {
    * is not a plain string the screen reader can pick up on its own.
    */
   readonly accessibilityLabel?: string;
+  /**
+   * Vertical distance between stacked toasts. Defaults to 64 scaled by the OS font scale.
+   * This adapter does not measure its content, so raise it when the registered content is
+   * taller than a single line.
+   */
+  readonly stackSpacing?: number;
+  /**
+   * Distance from the window edge to the first toast. Defaults to 48, which does not
+   * account for safe-area insets — pass the inset from `react-native-safe-area-context` to
+   * clear the status bar, Dynamic Island, or home indicator.
+   */
+  readonly viewportInset?: number;
 }
 
 function isToastOptions(value: unknown): value is BasicToastAdapterOptions {
@@ -116,11 +129,14 @@ export function BasicToastRenderer({
     return () => animation.stop();
   }, [controller, opacity, position, request.phase, translateY]);
 
-  const offset = index * 64;
+  // Scaled by the OS font scale because the adapter renders caller content it cannot measure:
+  // at a large accessibility text size a fixed pitch overlaps the toast below it.
+  const spacing = options.stackSpacing ?? 64 * PixelRatio.getFontScale();
+  const offset = index * spacing + (options.viewportInset ?? 48);
   return (
     <View
       pointerEvents="box-none"
-      style={[styles.viewport, position === 'top' ? { top: offset + 48 } : { bottom: offset + 48 }]}
+      style={[styles.viewport, position === 'top' ? { top: offset } : { bottom: offset }]}
     >
       <Animated.View
         {...(Platform.OS === 'android' ? { accessibilityLiveRegion: 'polite' as const } : {})}

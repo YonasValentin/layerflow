@@ -21,6 +21,10 @@ if (outcome.status === 'resolved' && outcome.value) {
 }
 ```
 
+`present()` always settles — it never rejects. `status` is one of `resolved`, `dismissed`,
+`cancelled`, `dropped`, or `failed`; see [`docs/outcomes.md`](docs/outcomes.md) for the full
+taxonomy and every reason each one carries.
+
 The caller has no idea whether `confirmDelete` shows up as an Expo UI sheet, a native alert, or a
 web dialog. That is the point: you swap the adapter without touching the call site.
 
@@ -170,14 +174,22 @@ type Props = PresentationContentProps<{ propertyId: string }, boolean>;
 
 function ConfirmDeleteContent({ input, resolve, dismiss }: Props) {
   return (
-    <View>
-      <Text>Delete {input.propertyId}?</Text>
-      <Button title="Delete" onPress={() => resolve(true)} />
-      <Button title="Cancel" onPress={() => dismiss('cancel-button')} />
-    </View>
+    <RNHostView matchContents>
+      <View>
+        <Text>Delete {input.propertyId}?</Text>
+        <Button title="Delete" onPress={() => resolve(true)} />
+        <Button title="Cancel" onPress={() => dismiss('cancel-button')} />
+      </View>
+    </RNHostView>
   );
 }
 ```
+
+> `confirmDelete` renders on the Expo UI sheet, whose children mount inside a native SwiftUI /
+> Jetpack Compose host — so a React Native tree needs `RNHostView` from `@expo/ui` (one root child).
+> Without it the sheet renders correctly on web and comes up empty on device. See the
+> [`@yonas-valentin-dev/layerflow-expo-ui` README](packages/expo-ui/README.md#content-constraints).
+> Toast and banner content is plain React Native and needs no wrapper.
 
 Calling `resolve()` doesn't settle the caller right away. Layerflow requests dismissal first and
 waits for the adapter to confirm the surface has finished closing, so the next queued overlay can't
@@ -197,7 +209,8 @@ programmatic close, so that adapter settles after a bounded, configurable `close
 - `interrupt`: cancel active and queued requests in the lane, then present the new request.
 - `stack`: activate right away if the lane has capacity; otherwise enqueue.
 - `drop`: return a dropped outcome when the lane is at capacity or already has a queue.
-- `coalesce`: return the existing request when the dedupe key already exists.
+- `coalesce`: return the existing request when the dedupe key already exists. Without an explicit
+  `dedupeKey` this dedupes on the presentation key, so every request for that key merges into one.
 
 Coalesced content can be merged instead of duplicated:
 
@@ -217,11 +230,15 @@ visibility timer without remounting.
 The default lanes run independently, so a blocking sheet, a stack of toasts, and an offline banner
 never contend for the same slot:
 
-- `blocking`: one active sheet, dialog, or modal.
-- `transient`: up to three active toasts.
-- `persistent`: up to three banners.
-- `anchored`: one popover or menu.
-- `navigation`: one route-backed presentation.
+- `blocking`: one active sheet, dialog, or modal — default strategy `enqueue`.
+- `transient`: up to three active toasts — default strategy `coalesce`.
+- `persistent`: up to three banners — default strategy `replace`.
+- `anchored`: one popover or menu — default strategy `replace`.
+- `navigation`: one route-backed presentation — default strategy `enqueue`.
+
+A registry entry that omits `lane` runs in `blocking`. A lane's capacity is only reachable with
+`enqueue` or `stack`: under the default `replace` or `coalesce` a second request dismisses or
+merges into the first, so register `strategy: 'stack'` to actually stack banners or toasts.
 
 You can register your own lanes and capacities.
 
@@ -235,6 +252,14 @@ npm run check
 `check` runs Prettier, a strict type-aware ESLint config, `tsc`, the test suite with coverage
 thresholds, the build, and a `npm pack` dry run. The repo also ships Dependabot, CodeQL, and the
 trusted-publishing workflow, so CI enforces the same bar as local.
+
+## Documentation
+
+- [`docs/api.md`](docs/api.md) — the complete public surface of every package.
+- [`docs/outcomes.md`](docs/outcomes.md) — outcome statuses and every reason they carry.
+- [`docs/architecture.md`](docs/architecture.md) — lanes, phases, and the invariants.
+- [`docs/adapter-authoring.md`](docs/adapter-authoring.md) — writing your own adapter.
+- [`docs/releasing.md`](docs/releasing.md) — the release process.
 
 ## Official APIs used
 

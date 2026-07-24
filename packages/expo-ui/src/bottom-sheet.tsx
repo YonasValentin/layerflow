@@ -5,16 +5,18 @@ import type { PresentationAdapterProps } from '@yonas-valentin-dev/layerflow-rea
 
 export interface ExpoUiBottomSheetAdapterOptions extends Pick<
   BottomSheetProps,
-  'modifiers' | 'showDragIndicator' | 'snapPoints'
+  'modifiers' | 'showDragIndicator' | 'snapPoints' | 'testID'
 > {
   /**
-   * Milliseconds to keep the request in the "dismissing" phase after a programmatic
-   * close, giving the native close animation time to finish before Layerflow settles.
+   * Milliseconds to keep the request in the "dismissing" phase before Layerflow settles,
+   * giving the sheet's close animation time to finish.
    *
-   * `@expo/ui`'s universal BottomSheet only fires `onDismiss` for user-initiated
-   * dismissal and exposes no completion callback for a prop-driven close, so this
-   * bounded delay is the only signal available. User dismissal still settles
-   * immediately via `onDismiss`.
+   * `@expo/ui`'s universal BottomSheet exposes no close-completion callback on either
+   * path. A prop-driven close reports nothing at all, and `onDismiss` fires when a user
+   * close *starts*, not when it ends: on web it is vaul's `onOpenChange(false)`, raised
+   * synchronously while the exit transition is still running, and on iOS it is the SwiftUI
+   * `isPresented` binding flip, which precedes the sheet's own completion callback. So both
+   * paths settle after this bounded delay; only the signal that starts the close differs.
    *
    * @default 500 on web (vaul's exit transition), 350 on native.
    */
@@ -34,6 +36,7 @@ export function ExpoUiBottomSheetRenderer({
 }: PresentationAdapterProps) {
   const mountedRef = useRef(false);
   const dismissedRef = useRef(false);
+  const userDismissRef = useRef(false);
   const options = isOptions(definition.adapterOptions) ? definition.adapterOptions : {};
   const isPresented = request.phase !== 'dismissing';
 
@@ -67,10 +70,16 @@ export function ExpoUiBottomSheetRenderer({
     <BottomSheet
       isPresented={isPresented}
       onDismiss={() => {
-        if (dismissedRef.current) return;
-        dismissedRef.current = true;
-        controller.dismissed('user');
+        if (dismissedRef.current || userDismissRef.current) return;
+        userDismissRef.current = true;
+        // This fires when the user's close *starts*, not when it finishes, so reporting
+        // `dismissed()` here would settle the request mid-animation and let the next
+        // presentation open into a sheet that is still on screen. Move the request into
+        // `dismissing` instead — that also drives `isPresented` to false so the primitive
+        // plays its exit — and let the bounded timer below settle it.
+        controller.dismiss('user');
       }}
+      {...(options.testID === undefined ? {} : { testID: options.testID })}
       {...(options.modifiers === undefined ? {} : { modifiers: options.modifiers })}
       {...(options.showDragIndicator === undefined
         ? {}

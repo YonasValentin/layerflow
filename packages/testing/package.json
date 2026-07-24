@@ -9,6 +9,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
@@ -46,6 +47,19 @@
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
   },
   "engines": {
-    "node": ">=22.13"
-  }
+    "node": ">=20.19.4"
+  },
+  "homepage": "https://github.com/YonasValentin/layerflow#readme",
+  "bugs": {
+    "url": "https://github.com/YonasValentin/layerflow/issues"
+  },
+  "author": "Yonas Valentin",
+  "keywords": [
+    "testing",
+    "test-helpers",
+    "overlay",
+    "presentation",
+    "scheduler",
+    "vitest"
+  ]
 }

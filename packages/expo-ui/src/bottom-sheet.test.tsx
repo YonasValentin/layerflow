@@ -114,7 +114,8 @@ describe('ExpoUiBottomSheetRenderer', () => {
     vi.useRealTimers();
   });
 
-  it('settles immediately when the user dismisses the sheet', async () => {
+  it('lets the exit animation finish before settling a user dismissal', async () => {
+    vi.useFakeTimers();
     const system = build(() => null);
     const promise = system.present('confirm', { id: '1' });
 
@@ -130,7 +131,17 @@ describe('ExpoUiBottomSheetRenderer', () => {
       sheetState.onDismiss?.();
     });
 
+    // `onDismiss` reports that the close *started*. The request must stay in `dismissing`
+    // so the next presentation cannot open into a sheet that is still animating out.
+    expect(system.manager.getSnapshot().lanes['blocking']?.active[0]?.phase).toBe('dismissing');
+    expect(sheetState.isPresented).toBe(false);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(350);
+    });
+
     await expect(promise).resolves.toEqual({ status: 'dismissed', reason: 'user' });
+    vi.useRealTimers();
   });
 
   it('reports a dismissal exactly once when the user gesture races the close timer', async () => {

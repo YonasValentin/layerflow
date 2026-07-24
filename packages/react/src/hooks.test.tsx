@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { StrictMode } from 'react';
 import { act, render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { PresentationProvider } from './context.js';
@@ -115,8 +116,11 @@ describe('usePresentationScope', () => {
     const view = wrap(system, <Screen />);
     const handle = system.enqueue('confirm', { id: '1' }, { scope: 'route-a' });
 
-    act(() => {
+    // Awaited so the teardown microtask (which distinguishes a real unmount from
+    // StrictMode's throwaway remount) runs before the adapter reports its exit.
+    await act(async () => {
       view.unmount();
+      await Promise.resolve();
     });
     act(() => {
       system.manager.notify(handle.id, { type: 'dismissed' });
@@ -137,11 +141,14 @@ describe('usePresentationScope', () => {
     const view = wrap(system, <Screen scope="route-a" />);
     const handle = system.enqueue('confirm', { id: '1' }, { scope: 'route-a' });
 
-    view.rerender(
-      <PresentationProvider system={system}>
-        <Screen scope="route-b" />
-      </PresentationProvider>,
-    );
+    await act(async () => {
+      view.rerender(
+        <PresentationProvider system={system}>
+          <Screen scope="route-b" />
+        </PresentationProvider>,
+      );
+      await Promise.resolve();
+    });
     act(() => {
       system.manager.notify(handle.id, { type: 'dismissed' });
     });
@@ -150,6 +157,36 @@ describe('usePresentationScope', () => {
       status: 'cancelled',
       reason: 'scope-disposed',
     });
+  });
+
+  it('does not cancel an in-flight scoped request on a StrictMode remount', async () => {
+    const system = build();
+    // Already in flight before the owning screen mounts, e.g. enqueued from a nav event.
+    const handle = system.enqueue('confirm', { id: '1' }, { scope: 'route-a' });
+    function Screen() {
+      usePresentationScope('route-a');
+      return null;
+    }
+
+    await act(async () => {
+      render(
+        <StrictMode>
+          <PresentationProvider system={system}>
+            <Screen />
+          </PresentationProvider>
+        </StrictMode>,
+      );
+      await Promise.resolve();
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // StrictMode's throwaway unmount must not dispose a scope whose owner is still mounted.
+    const request = system.manager
+      .getSnapshot()
+      .lanes['blocking']?.active.find((entry) => entry.id === handle.id);
+    expect(request?.phase).toBe('mounting');
   });
 });
 
