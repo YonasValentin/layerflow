@@ -22,5 +22,6 @@ handles deduplication, coalescing, scopes, `AbortSignal`, and timeouts, and it e
 snapshots and a lifecycle event stream. The load-bearing rule: a request's promise settles only
 after its renderer confirms the dismissal finished.
 
-See the repository README and [`docs/architecture.md`](../../docs/architecture.md) for the full API
-and the invariants it holds.
+See [`docs/api.md`](../../docs/api.md) for the full API, [`docs/outcomes.md`](../../docs/outcomes.md)
+for what a request settles to, and [`docs/architecture.md`](../../docs/architecture.md) for the
+model and the invariants it holds.

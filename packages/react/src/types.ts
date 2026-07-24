@@ -29,6 +29,11 @@ export interface PresentationDefinition<Input, Result, AdapterOptions = unknown>
   readonly lane?: string;
   readonly strategy?: PresentationStrategy;
   readonly priority?: number;
+  /**
+   * Bounds how long the presentation may stay open. The clock starts when the request leaves
+   * the queue and enters the `mounting` phase, so time spent waiting for lane capacity is not
+   * counted against it.
+   */
   readonly timeoutMs?: number;
   readonly dedupeKey?: string | ((input: Input) => string);
   readonly adapterOptions?: AdapterOptions;

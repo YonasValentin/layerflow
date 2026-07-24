@@ -255,6 +255,47 @@ describe('createPresentationManager', () => {
     vi.useRealTimers();
   });
 
+  it('starts the timeout clock at activation rather than at enqueue', async () => {
+    vi.useFakeTimers();
+    const manager = createPresentationManager<TestMap>();
+    // Single-slot blocking lane: the second request waits behind the first.
+    const active = manager.enqueue('alpha', { value: 1 });
+    const queued = manager.enqueue('alpha', { value: 2 }, { timeoutMs: 100 });
+
+    // Time spent waiting for capacity must not count against the budget, or a queued
+    // request expires without ever being shown.
+    await vi.advanceTimersByTimeAsync(500);
+    expect(manager.getSnapshot().lanes['blocking']?.queue).toHaveLength(1);
+
+    manager.dismiss(active.id, 'programmatic');
+    manager.notify(active.id, { type: 'dismissed' });
+    expect(manager.getSnapshot().lanes['blocking']?.active[0]?.phase).toBe('mounting');
+
+    await vi.advanceTimersByTimeAsync(100);
+    expect(manager.getSnapshot().lanes['blocking']?.active[0]?.phase).toBe('dismissing');
+    manager.notify(queued.id, { type: 'dismissed' });
+    await expect(queued.result).resolves.toEqual({ status: 'dismissed', reason: 'timeout' });
+    vi.useRealTimers();
+  });
+
+  it('lets a joining coalesced caller cancel through its own signal', async () => {
+    const manager = createPresentationManager<TestMap>();
+    const first = manager.enqueue('alpha', { value: 1 }, { strategy: 'coalesce', dedupeKey: 'k' });
+    const controller = new AbortController();
+    const joined = manager.enqueue(
+      'alpha',
+      { value: 2 },
+      { strategy: 'coalesce', dedupeKey: 'k', signal: controller.signal },
+    );
+
+    expect(joined.id).toBe(first.id);
+    controller.abort();
+
+    expect(manager.getSnapshot().lanes['blocking']?.active[0]?.phase).toBe('dismissing');
+    manager.notify(first.id, { type: 'dismissed' });
+    await expect(first.result).resolves.toEqual({ status: 'cancelled', reason: 'abort-signal' });
+  });
+
   it('dismisses the newest active request from selected lanes', () => {
     const manager = createPresentationManager<TestMap>();
     manager.configureLane('blocking', { maxActive: 2 });

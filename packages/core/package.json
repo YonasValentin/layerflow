@@ -9,6 +9,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "import": {
         "types": "./dist/index.d.ts",
@@ -27,7 +28,7 @@
     "NOTICE"
   ],
   "engines": {
-    "node": ">=22.13"
+    "node": ">=20.19.4"
   },
   "publishConfig": {
     "access": "public",
@@ -41,5 +42,21 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean --tsconfig tsconfig.build.json",
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
-  }
+  },
+  "homepage": "https://github.com/YonasValentin/layerflow#readme",
+  "bugs": {
+    "url": "https://github.com/YonasValentin/layerflow/issues"
+  },
+  "author": "Yonas Valentin",
+  "keywords": [
+    "overlay",
+    "modal",
+    "presentation",
+    "queue",
+    "scheduler",
+    "headless",
+    "dialog",
+    "sheet",
+    "toast"
+  ]
 }

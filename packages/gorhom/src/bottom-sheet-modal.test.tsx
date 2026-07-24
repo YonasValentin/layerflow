@@ -162,13 +162,45 @@ describe('GorhomBottomSheetModalRenderer', () => {
     await expect(promise).resolves.toEqual({ status: 'dismissed', reason: 'programmatic' });
   });
 
+  it('settles as a user dismissal when the sheet closes itself', async () => {
+    const system = build();
+    const promise = system.present('confirm', { id: '1' });
+    mount(system);
+    await flush();
+    act(() => {
+      modal.flushFrame();
+    });
+    expect(system.manager.getSnapshot().lanes['blocking']?.active[0]?.phase).toBe('presented');
+
+    // Swipe-to-dismiss: gorhom closes itself, with no prior Layerflow dismiss.
+    act(() => {
+      modal.mounted = false;
+      modal.onDismiss?.();
+    });
+
+    await expect(promise).resolves.toEqual({ status: 'dismissed', reason: 'user' });
+    expect(system.manager.getSnapshot().lanes['blocking']?.active).toHaveLength(0);
+    expect(modal.dismissCalls).toBe(0);
+  });
+
   it('keeps ownership of the props Layerflow controls', async () => {
-    const system = build({ modalProps: { stackBehavior: 'switch', enableDismissOnClose: false } });
+    const system = build({
+      modalProps: {
+        stackBehavior: 'switch',
+        enableDismissOnClose: false,
+        animateOnMount: false,
+        index: -1,
+      },
+    });
     system.enqueue('confirm', { id: '1' });
     mount(system);
     await flush();
 
     expect(modal.props['stackBehavior']).toBe('push');
     expect(modal.props['enableDismissOnClose']).toBe(true);
+    // gorhom emits onChange only from the mount animation's completion callback, so
+    // suppressing that animation would strand every request in `dismissing`.
+    expect(modal.props['animateOnMount']).toBe(true);
+    expect(modal.props['index']).toBe(0);
   });
 });

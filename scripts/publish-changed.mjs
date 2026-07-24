@@ -12,7 +12,28 @@ const packages = readdirSync('packages', { withFileTypes: true })
   .map((entry) => JSON.parse(readFileSync(join('packages', entry.name, 'package.json'), 'utf8')))
   .filter((pkg) => typeof pkg.name === 'string' && pkg.private !== true);
 
-for (const pkg of packages) {
+// Readdir order is alphabetical, which would ship expo-ui and gorhom before the react package
+// they depend on. Derive the order from the manifests instead of duplicating the hard-coded
+// list in the root build script, so a new package cannot be added in the wrong slot.
+const byName = new Map(packages.map((pkg) => [pkg.name, pkg]));
+const ordered = [];
+const done = new Set();
+const visit = (pkg, stack) => {
+  if (done.has(pkg.name)) return;
+  if (stack.has(pkg.name)) throw new Error(`workspace dependency cycle at ${pkg.name}`);
+  stack.add(pkg.name);
+  const deps = { ...pkg.dependencies, ...pkg.peerDependencies, ...pkg.optionalDependencies };
+  for (const name of Object.keys(deps)) {
+    const dep = byName.get(name);
+    if (dep !== undefined) visit(dep, stack);
+  }
+  stack.delete(pkg.name);
+  done.add(pkg.name);
+  ordered.push(pkg);
+};
+for (const pkg of packages) visit(pkg, new Set());
+
+for (const pkg of ordered) {
   let published = '';
   try {
     published = execFileSync('npm', ['view', `${pkg.name}@${pkg.version}`, 'version'], {

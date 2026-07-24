@@ -18,9 +18,10 @@
   "include": [
     "packages/**/*.test.ts",
     "packages/**/*.test.tsx",
-    "examples/**/*.ts",
-    "examples/**/*.tsx",
     "scripts/vitest-setup.ts",
     "vitest.config.ts"
-  ]
+  ],
+  // The Expo example is checked by examples/expo-app/tsconfig.json instead, under the
+  // bundler resolution an Expo app actually uses.
+  "exclude": ["examples"]
 }

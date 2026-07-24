@@ -3,7 +3,13 @@ import { BottomSheetModal, type BottomSheetModalProps } from '@gorhom/bottom-she
 import type { PresentationAdapterProps } from '@yonas-valentin-dev/layerflow-react';
 
 type LayerflowControlledProps =
-  'children' | 'enableDismissOnClose' | 'name' | 'onChange' | 'onDismiss' | 'stackBehavior';
+  | 'animateOnMount'
+  | 'children'
+  | 'enableDismissOnClose'
+  | 'name'
+  | 'onChange'
+  | 'onDismiss'
+  | 'stackBehavior';
 
 export interface GorhomBottomSheetAdapterOptions {
   /** Props passed to BottomSheetModal except lifecycle and stacking props owned by Layerflow. */
@@ -71,6 +77,13 @@ export function GorhomBottomSheetModalRenderer({
       ref={modalRef}
       {...options.modalProps}
       name={request.id}
+      // Layerflow reports presented() — and flushes a deferred dismiss — from onChange, and
+      // gorhom emits onChange only from the mount animation's completion callback. Both
+      // `animateOnMount: false` and a negative initial index skip that animation entirely
+      // (`didAnimateOnMount = !animateOnMount || index === -1`), so a dismiss arriving before
+      // the mount settles would strand the request in "dismissing" and deadlock the lane.
+      index={Math.max(0, options.modalProps?.index ?? 0)}
+      animateOnMount
       enableDismissOnClose
       stackBehavior="push"
       onChange={(index) => {

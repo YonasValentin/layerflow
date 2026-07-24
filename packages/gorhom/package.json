@@ -10,10 +10,17 @@
   "react-native": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "react-native": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "import": {
+          "types": "./dist/index.d.ts",
+          "default": "./dist/index.js"
+        },
+        "require": {
+          "types": "./dist/index.d.cts",
+          "default": "./dist/index.cjs"
+        }
       },
       "import": {
         "types": "./dist/index.d.ts",
@@ -62,6 +69,19 @@
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
   },
   "engines": {
-    "node": ">=22.13"
-  }
+    "node": ">=20.19.4"
+  },
+  "homepage": "https://github.com/YonasValentin/layerflow#readme",
+  "bugs": {
+    "url": "https://github.com/YonasValentin/layerflow/issues"
+  },
+  "author": "Yonas Valentin",
+  "keywords": [
+    "react-native",
+    "bottom-sheet",
+    "gorhom",
+    "overlay",
+    "presentation",
+    "scheduler"
+  ]
 }

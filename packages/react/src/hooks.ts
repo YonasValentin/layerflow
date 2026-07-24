@@ -1,4 +1,4 @@
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/shim/with-selector';
 import type { PresentationSnapshot } from '@yonas-valentin-dev/layerflow-core';
 import { usePresentationSystem } from './context.js';
@@ -40,6 +40,22 @@ export function usePresentations<Map extends object>(): PresentationSystem<Map> 
  */
 export function usePresentationScope(scope: string): string {
   const { cancelScope } = usePresentationSystem();
-  useEffect(() => () => cancelScope(scope), [cancelScope, scope]);
+  const liveRef = useRef(false);
+  const scopeRef = useRef(scope);
+  useEffect(() => {
+    liveRef.current = true;
+    scopeRef.current = scope;
+    return () => {
+      liveRef.current = false;
+      queueMicrotask(() => {
+        // StrictMode's throwaway unmount/remount restores both refs synchronously before this
+        // runs, so an initial mount does not cancel its own scope. A real unmount leaves
+        // liveRef false, and a scope change leaves scopeRef on the new scope — so the previous
+        // scope is still cancelled while mounted.
+        if (liveRef.current && scopeRef.current === scope) return;
+        cancelScope(scope);
+      });
+    };
+  }, [cancelScope, scope]);
   return scope;
 }

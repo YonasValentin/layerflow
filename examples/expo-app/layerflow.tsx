@@ -1,4 +1,5 @@
 import { Button, Text, View } from 'react-native';
+import { RNHostView } from '@expo/ui';
 import type { BasicToastAdapterOptions } from '@yonas-valentin-dev/layerflow-react-native';
 import type { ExpoUiBottomSheetAdapterOptions } from '@yonas-valentin-dev/layerflow-expo-ui';
 import {
@@ -26,12 +27,18 @@ function Filters({
   Presentations['filters']['input'],
   Presentations['filters']['result']
 >) {
+  // `@expo/ui`'s BottomSheet mounts its children inside a native SwiftUI (iOS) / Jetpack
+  // Compose (Android) host, which cannot render a React Native tree directly — an unwrapped
+  // tree renders correctly on web (vaul) and comes up empty on device. `RNHostView` embeds
+  // one React Native root inside that host, so it takes exactly one child.
   return (
-    <View style={{ padding: 24, gap: 12 }}>
-      <Text>Initial tab: {input.initialTab ?? 'all'}</Text>
-      <Button title="Apply" onPress={() => resolve({ applied: true })} />
-      <Button title="Cancel" onPress={() => dismiss('cancel-button')} />
-    </View>
+    <RNHostView matchContents>
+      <View style={{ padding: 24, gap: 12 }}>
+        <Text>Initial tab: {input.initialTab ?? 'all'}</Text>
+        <Button title="Apply" onPress={() => resolve({ applied: true })} />
+        <Button title="Cancel" onPress={() => dismiss('cancel-button')} />
+      </View>
+    </RNHostView>
   );
 }
 

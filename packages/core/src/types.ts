@@ -51,8 +51,28 @@ export interface PresentationOptions {
   readonly strategy?: PresentationStrategy;
   readonly priority?: number;
   readonly dedupeKey?: string;
+  /**
+   * Groups the request for bulk cancellation via `cancelScope`.
+   *
+   * Ignored when the call coalesces into an existing request: the surviving request keeps
+   * the scope it was created with.
+   */
   readonly scope?: string;
+  /**
+   * Bounds how long the request may stay open. The clock starts when the request leaves the
+   * queue and enters the `mounting` phase, so time spent waiting for lane capacity is not
+   * counted against it.
+   *
+   * Ignored when the call coalesces into an existing request: the surviving request keeps
+   * the deadline it was created with.
+   */
   readonly timeoutMs?: number;
+  /**
+   * Cancels the request when the signal aborts.
+   *
+   * Honored even when the call coalesces into an existing request — a joining caller can
+   * still cancel the request it joined.
+   */
   readonly signal?: AbortSignal;
   readonly coalesceInput?: (current: unknown, incoming: unknown) => unknown;
   readonly metadata?: Readonly<Record<string, unknown>>;

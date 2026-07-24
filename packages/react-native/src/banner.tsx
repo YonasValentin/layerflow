@@ -3,6 +3,7 @@ import {
   AccessibilityInfo,
   Animated,
   Easing,
+  PixelRatio,
   Platform,
   StyleSheet,
   View,
@@ -19,6 +20,18 @@ export interface BasicBannerAdapterOptions {
    * its `accessibilityLiveRegion`; iOS has no equivalent prop, so set this to announce it.
    */
   readonly accessibilityLabel?: string;
+  /**
+   * Vertical distance between stacked banners. Defaults to 72 scaled by the OS font scale.
+   * This adapter does not measure its content, so raise it when the registered content is
+   * taller than a single line.
+   */
+  readonly stackSpacing?: number;
+  /**
+   * Distance from the window edge to the first banner. Defaults to 16, which does not
+   * account for safe-area insets — pass the inset from `react-native-safe-area-context` to
+   * clear the status bar, Dynamic Island, or home indicator.
+   */
+  readonly viewportInset?: number;
 }
 
 function isBannerOptions(value: unknown): value is BasicBannerAdapterOptions {
@@ -76,11 +89,19 @@ export function BasicBannerRenderer({
       easing: Easing.in(Easing.cubic),
       useNativeDriver: true,
     });
-    animation.start(() => controller.dismissed());
+    animation.start(({ finished }) => {
+      // Only settle when the exit animation actually completed; an interrupted stop() — or a
+      // new animation started on the same value — fires this callback with finished: false and
+      // must not report a spurious dismissal (mirrors the enter-animation guard).
+      if (finished) controller.dismissed();
+    });
     return () => animation.stop();
   }, [controller, opacity, request.phase]);
 
-  const offset = 16 + index * 72;
+  // Scaled by the OS font scale because the adapter renders caller content it cannot measure:
+  // at a large accessibility text size a fixed pitch overlaps the banner below it.
+  const spacing = options.stackSpacing ?? 72 * PixelRatio.getFontScale();
+  const offset = (options.viewportInset ?? 16) + index * spacing;
   return (
     <View
       pointerEvents="box-none"

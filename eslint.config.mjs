@@ -17,12 +17,13 @@ export default tseslint.config(
         projectService: {
           // Package build projects exclude tests, so these resolve through
           // defaultProject (tsconfig.tests.json) instead.
+          // examples/expo-app is intentionally absent: it owns a tsconfig.json (bundler
+          // resolution, as Metro uses), so the project service resolves it directly.
           allowDefaultProject: [
             '*.mjs',
             'scripts/*.mjs',
             'scripts/*.ts',
             'vitest.config.ts',
-            'examples/expo-app/*.tsx',
             'packages/*/src/*.test.ts',
             'packages/*/src/*.test.tsx',
           ],

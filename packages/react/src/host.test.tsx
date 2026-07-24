@@ -212,6 +212,64 @@ describe('PresentationHost', () => {
     expect(settled).toBe(false);
     expect(system.manager.getSnapshot().lanes['blocking']?.active).toHaveLength(1);
   });
+
+  it('settles a request promoted into the active slot after the last commit', async () => {
+    const system = buildSystem();
+
+    // Single-slot blocking lane: first is active, second waits in the queue.
+    const first = system.enqueue('confirm', { id: '1' });
+    const second = system.enqueue('confirm', { id: '2' });
+    const view = renderHost(system, { sheet: ImmediatePresentationAdapter });
+    await flush();
+
+    act(() => {
+      // The adapter reports its exit, so core settles the first request and pump() promotes
+      // the second into `active`. The host then tears down before that promotion is ever
+      // committed, so the promoted request has no item of its own to settle it.
+      system.manager.notify(first.id, { type: 'dismissed' });
+      view.unmount();
+    });
+
+    await expect(second.result).resolves.toMatchObject({
+      status: 'dismissed',
+      reason: 'host-unmounted',
+    });
+    expect(system.manager.getSnapshot().lanes['blocking']?.active).toHaveLength(0);
+  });
+
+  it('keeps presentations alive when the host remounts under a new key', async () => {
+    const system = buildSystem();
+    const KeepOpen = ({ controller }: PresentationAdapterProps) => {
+      useEffect(() => {
+        controller.mounted();
+        controller.presented();
+      }, [controller]);
+      return null;
+    };
+
+    let settled = false;
+    const handle = system.enqueue('confirm', { id: '1' });
+    void handle.result.then(() => (settled = true));
+
+    const tree = (key: string) => (
+      <PresentationProvider system={system}>
+        <PresentationHost key={key} adapters={{ sheet: KeepOpen }} />
+      </PresentationProvider>
+    );
+    const view = render(tree('a'));
+    await flush();
+
+    // A keyed remount destroys the old host instance and mounts a new one in the same commit.
+    // Teardown is scoped to the manager, not the instance, so nothing may be settled.
+    await act(async () => {
+      view.rerender(tree('b'));
+      await Promise.resolve();
+    });
+    await flush();
+
+    expect(settled).toBe(false);
+    expect(system.manager.getSnapshot().lanes['blocking']?.active).toHaveLength(1);
+  });
 });
 
 describe('ImmediatePresentationAdapter', () => {

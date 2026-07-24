@@ -38,6 +38,7 @@ interface RuntimeRequest {
   metadata?: Readonly<Record<string, unknown>>;
   deferred: Deferred<PresentationOutcome<unknown>>;
   pendingOutcome: PresentationOutcome<unknown> | undefined;
+  timeoutMs: number | undefined;
   timeout: ReturnType<typeof setTimeout> | undefined;
   dismissTimeout: ReturnType<typeof setTimeout> | undefined;
   removeAbortListener: (() => void) | undefined;
@@ -248,6 +249,15 @@ export function createPresentationManager<Map extends object>(
   const activate = (lane: RuntimeLane, request: RuntimeRequest): void => {
     request.phase = 'mounting';
     lane.active.push(request);
+    // Arm the present-phase watchdog here rather than at enqueue: time spent waiting for
+    // lane capacity must not count against a budget that bounds how long the surface stays
+    // open. Armed before the event so a listener that synchronously dismisses cannot leave
+    // a dangling timer (requestDismissal clears it), and idempotent so a re-activation
+    // cannot stack timers.
+    if (request.timeoutMs !== undefined && request.timeout === undefined) {
+      const ms = request.timeoutMs;
+      request.timeout = setTimeout(() => manager.dismiss(request.id, 'timeout'), ms);
+    }
     emitEvent({ type: 'request.activated', request: toSnapshot(request) });
   };
 
@@ -379,8 +389,25 @@ export function createPresentationManager<Map extends object>(
               duplicate.input = requestOptions.coalesceInput(duplicate.input, input);
             }
             duplicate.revision += 1;
+            // A joining caller keeps its cancellation channel: chain its signal onto the
+            // surviving request so any joiner can abort it. `scope` and `timeoutMs` stay
+            // owned by the original request (documented on PresentationOptions) because the
+            // surviving request already has a lifetime and reassigning it would surprise
+            // the first caller.
+            const joinSignal = requestOptions.signal;
+            if (joinSignal !== undefined && !joinSignal.aborted) {
+              const abort = (): void => manager.cancel(duplicate.id, 'abort-signal');
+              joinSignal.addEventListener('abort', abort, { once: true });
+              const previous = duplicate.removeAbortListener;
+              duplicate.removeAbortListener = () => {
+                previous?.();
+                joinSignal.removeEventListener('abort', abort);
+              };
+            }
             emitEvent({ type: 'request.updated', request: toSnapshot(duplicate) });
             rebuildSnapshot();
+            // Cancel after the rebuild so the store never observes a half-updated state.
+            if (joinSignal?.aborted === true) manager.cancel(duplicate.id, 'abort-signal');
             return createHandle(duplicate);
           }
           if (strategy === 'drop') return createDroppedHandle('duplicate');
@@ -409,6 +436,7 @@ export function createPresentationManager<Map extends object>(
         createdAt: now(),
         deferred: createDeferred(),
         pendingOutcome: undefined,
+        timeoutMs: requestOptions.timeoutMs,
         timeout: undefined,
         dismissTimeout: undefined,
         removeAbortListener: undefined,
@@ -427,12 +455,6 @@ export function createPresentationManager<Map extends object>(
           request.removeAbortListener = () =>
             requestOptions.signal?.removeEventListener('abort', abort);
         }
-      }
-      if (requestOptions.timeoutMs !== undefined) {
-        request.timeout = setTimeout(
-          () => manager.dismiss(request.id, 'timeout'),
-          requestOptions.timeoutMs,
-        );
       }
 
       // Emitted after resource registration so a listener that synchronously
